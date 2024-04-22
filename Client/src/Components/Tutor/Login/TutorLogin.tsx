@@ -4,7 +4,7 @@ import {Link, useNavigate} from 'react-router-dom';
 import {useDispatch,useSelector} from 'react-redux';
 import { loginTutor } from "../../../Utils/api/types";
 import { tutorLogin } from "../../../Utils/config/axios.PostMethods";
-import { tutorlogin } from "../../../Slices/tutorSlice/tutorSlice";
+import { tutorlogin, tutorregister } from "../../../Slices/tutorSlice/tutorSlice";
 import { useTutorValidate } from "../../../Utils/Validation/tutorloginValidation";
 import { ToastContainer } from "react-toastify";
 import {toast } from 'sonner';
@@ -47,8 +47,8 @@ function TutorLogin() {
                 console.log(res.data.response, "res");
                 localStorage.setItem("Token", `${res.data.token}`);
                 localStorage.setItem("isVerified",'true')
-                // dispatch(tutorlogin(res.data.response));
-                dispatch(tutorlogin(res.data.token));
+                dispatch(tutorlogin(res.data.response));
+                // dispatch(tutorlogin(res.data.token));
                 navigate("/tutor/home", { replace: true });
               } else {
                 toast.success("not exist ")
@@ -74,6 +74,7 @@ function TutorLogin() {
         if(response.status === 200) {
           dispatch(tutorlogin(response.data.token));
           localStorage.setItem("Token",`${response.data.token}`);
+          dispatch(tutorregister(response.data.response));
           navigate("/tutor/home", {replace: true});
         } else {
           if(response.response.status === 404) {

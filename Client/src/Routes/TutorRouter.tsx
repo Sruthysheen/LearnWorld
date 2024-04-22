@@ -11,6 +11,9 @@ import TutorProfilePage from '../Pages/Tutor/TutorProfilePage';
 import TutorNavbar from '../Components/Tutor/Header/TutorNavbar';
 import TutorAddNewCoursePage from '../Pages/Tutor/TutorAddNewCoursePage';
 import PrivatePage from '../Components/PrivateRouter/PrivatePage';
+import MyCourseTutorPage from '../Pages/Tutor/MyCourseTutorPage';
+import SingleCourseViewPage from '../Pages/Tutor/SingleCourseViewPage';
+import EditCoursePage from '../Pages/Tutor/EditCoursePage';
 
 const TutorRouter = () => {
     const location = useLocation();
@@ -26,10 +29,13 @@ const TutorRouter = () => {
                 <Route path="/verifyforgototptutor" element={<TutorForgotOtpPage/>} />
                 <Route path="/tutornewpassword" element={<TutorNewPasswordPage/>} />
                 
-                <Route element={<PrivatePage isStudent={false} />}>
+                <Route element={<PrivatePage isStudent={false} />}> 
                 <Route path="/home" element={<TutorHomePage/>} />
                 <Route path="/tutorprofile" element={<TutorProfilePage/>} />
-                <Route path="/tutornewcourse" element={<TutorAddNewCoursePage/>} />
+                <Route path="/addnewcourse" element={<TutorAddNewCoursePage/>} />
+                <Route path="/getallcourse/:id" element={<MyCourseTutorPage/>} /> 
+                <Route path="/viewcourse" element={<SingleCourseViewPage/>} />
+                <Route path="/editcourse/:id" element={<EditCoursePage/>} />
                 </Route>
             </Routes> 
         </>

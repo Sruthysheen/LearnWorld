@@ -26,7 +26,6 @@ const studentSlice = createSlice({
 });
 
 export const {login,register,logout} = studentSlice.actions;
-export const selectStudent = (state: { student: studentState}) => state.student.student
 
 export default studentSlice.reducer
 

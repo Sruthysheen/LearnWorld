@@ -23,9 +23,9 @@ const StudentRouter = () => {
         <Route path = "/newpassword" element = {<NewPasswordPage/>} />
 
 
-        <Route element={<PrivatePage isStudent={true} />}>
+        {/* <Route element={<PrivatePage isStudent={true} />}> */}
         <Route path="/" element={<HomePage />} />
-        </Route>
+        {/* </Route> */}
 
       </Routes>
     </>

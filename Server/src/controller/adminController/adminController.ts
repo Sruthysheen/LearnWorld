@@ -211,7 +211,8 @@ const loginAdmin = async (req: Request, res: Response) => {
 
   const listAllCategory = async (req: Request, res: Response) => {
     try {
-      const categoryDetails = await Category.find().exec();
+      const categoryDetails = await Category.find({ isDeleted: false }).exec();
+
       if (categoryDetails) {
         return res.status(200).json({
           categoryDetails
@@ -225,6 +226,25 @@ const loginAdmin = async (req: Request, res: Response) => {
     }
   };
   
+
+  const listAllCategoryForView = async (req: Request, res: Response) => {
+    try {
+      const categoryDetails = await Category.find({ isDeleted: false }).exec();
+  
+      if (categoryDetails) {
+        return res.status(200).json({
+          data: categoryDetails 
+        });
+      } else {
+        return res.status(400).json({ message: "Category does not exist" });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  };
+
+
 
   const getCategoryById = async(req:Request, res:Response)=>{
     const id = req.params.id;
@@ -312,6 +332,10 @@ console.log(req.body);
       res.status(500).json({ success: false, message: "Internal server error" });
     }
   };
+
+
+
+  
   
 
 
@@ -332,5 +356,7 @@ console.log(req.body);
           listAllCategory,
           getCategoryById,
           editCategory,
-          deleteCategory
+          deleteCategory,
+          listAllCategoryForView
+          
         }

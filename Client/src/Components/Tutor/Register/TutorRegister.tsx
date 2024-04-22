@@ -29,11 +29,11 @@ function tutorRegister() {
 
     const {tutor} = useSelector((state: any) => state.tutor);
 
-    useEffect(()=>{
-        if(tutor) {
-            navigate("/tutorotp",{replace: true});
-        }
-    },[]);
+    // useEffect(()=>{
+    //     if(tutor) {
+    //         navigate("/tutorotp",{replace: true});
+    //     }
+    // },[]);
 
 
 
@@ -49,8 +49,8 @@ function tutorRegister() {
                 console.log(res.data.token, "res");
                 localStorage.setItem("Token", `${res.data.token}`);
                 localStorage.setItem("isVerified",'true')
-                // dispatch(tutorregister(res.data.response));
-                dispatch(tutorregister(res.data.token));
+                dispatch(tutorregister(res.data.response));
+                // dispatch(tutorregister(res.data.token));
                 navigate("/tutor/home", { replace: true });
               } else {
                 console.log("user not exist");

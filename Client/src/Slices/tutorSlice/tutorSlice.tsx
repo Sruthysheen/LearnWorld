@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { stat } from "fs";
 
 interface tutorState {
-  tutor: any; // You should replace 'any' with the actual type of your user object
+  tutor: any; 
   course:any;
   image:any;
 }
@@ -44,6 +44,5 @@ const tutorSlice = createSlice({
 });
 
 export const { tutorlogin, tutorlogout, tutorregister, updateProfileImage} = tutorSlice.actions;
-export const selectTutor = (state: { tutor: tutorState }) => state.tutor.tutor;
 
 export default tutorSlice.reducer;

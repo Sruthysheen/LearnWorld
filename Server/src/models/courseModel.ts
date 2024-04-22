@@ -50,17 +50,17 @@ const courSchema =new mongoose.Schema({
     }],
     category:{
         type:mongoose.Schema.Types.ObjectId,
-        ref: "categoryModel", 
+        ref: "category", 
         required: true   
     },
     tutor:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"tutorModel",
+        ref:"Tutor",
         required:true
     },
     students: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'studentModel',
+        ref: 'Student',
       }],
     lessons: [{
         type: mongoose.Schema.Types.ObjectId,

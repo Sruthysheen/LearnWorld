@@ -3,68 +3,68 @@ import React from 'react';
 // Sample data array for courses
 const courses = [
   {
-    name: "Course 1",
-    tutor: "Tutor 1",
+    name: "HTML and CSS",
+    tutor: "Pete Jepson",
     priceOriginal: "MVR 1000",
     priceSale: "MVR 700",
-    image: "https://example.com/image1.jpg",
+    image: "public/Html.png",
     rating: "4.5 Stars"
   },
   {
-    name: "Course 2",
-    tutor: "Tutor 2",
+    name: "Advanced SQL",
+    tutor: "Meera K S",
     priceOriginal: "MVR 1200",
     priceSale: "MVR 800",
-    image: "https://example.com/image2.jpg",
+    image: "public/Sql.webp",
     rating: "4.8 Stars"
   },
   {
-    name: "Course 3",
-    tutor: "Tutor 3",
+    name: "Swift",
+    tutor: "Anu Joseph",
     priceOriginal: "MVR 1100",
     priceSale: "MVR 650",
-    image: "https://img.freepik.com/free-photo/pasta-spaghetti-with-shrimps-sauce_1220-5072.jpg?w=2000&t=st=1678041911~exp=1678042511~hmac=e4aa55e70f8c231d4d23832a611004f86eeb3b6ca067b3fa0c374ac78fe7aba6",
+    image: "public/Swift1.jpg",
     rating: "4.9 Stars"
   },
   {
-    name: "Course 4",
-    tutor: "Tutor 4",
+    name: "Big Data Technologies",
+    tutor: "Teena Kurian",
     priceOriginal: "MVR 900",
     priceSale: "MVR 600",
-    image: "https://example.com/image4.jpg",
+    image: "Big-Data.jpg",
     rating: "4.7 Stars"
   },
   // Add more courses as needed
   {
-    name: "Course 5",
-    tutor: "Tutor 4",
+    name: "React Native",
+    tutor: "Alexander",
     priceOriginal: "MVR 900",
     priceSale: "MVR 600",
-    image: "https://example.com/image4.jpg",
+    image: "public/React.jpg",
     rating: "4.7 Stars"
   },
   {
-    name: "Course 6",
-    tutor: "Tutor 4",
+    name: "JavaScript",
+    tutor: "Rosel",
     priceOriginal: "MVR 900",
     priceSale: "MVR 600",
-    image: "https://example.com/image4.jpg",
+    image: "public/js.jpg",
     rating: "4.7 Stars"
   },
   {
-    name: "Course 7",
-    tutor: "Tutor 4",
+    name: "Android Studio",
+    tutor: "Joseph",
     priceOriginal: "MVR 900",
     priceSale: "MVR 600",
-    image: "https://example.com/image4.jpg",
+    image: "public/Android.webp",
     rating: "4.7 Stars"
   },
   {
-    name: "Course 8",
-    tutor: "Tutor 4",
+    name: "Flutter",
+    tutor: "Emanual",
     priceOriginal: "MVR 900",
     priceSale: "MVR 600",
-    image: "https://example.com/image4.jpg",
+    image: "public/Flutter.jpg",
     rating: "4.7 Stars"
   },
 ];
@@ -75,7 +75,7 @@ function RecommendedForyouCard() {
       <div className='mt-10 w-full h-10 flex justify-start items-center p-10 font-bold text-3xl text-sky-600'>
         Recommended For You
       </div>
-      <div className="mt-4 flex flex-wrap justify-center gap-10 p-10 bg-gradient-to-br from-indigo-100 px-2">
+      <div className="mt-4 flex flex-wrap justify-center gap-10 p-10 bg-gradient-to-br from-white px-2">
 
         {/* Mapping over the courses array */}
         {courses.map((course, index) => (
@@ -84,7 +84,7 @@ function RecommendedForyouCard() {
               <div className="h-44 bg-cover bg-center" style={{ backgroundImage: `url(${course.image})` }}>
               </div>
               <div className="p-3">
-                <p className="font-bold text-gray-700 text-lg mb-1">
+                <p className="font-bold text-sky-700 text-lg mb-1">
                   {course.name}
                 </p>
                 <p className="text-gray-500 text-sm">

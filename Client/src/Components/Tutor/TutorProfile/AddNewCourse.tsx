@@ -1,157 +1,281 @@
-import React, { ChangeEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
-import { useCourseValidation } from "../../../Utils/Validation/addCourseValidation";
+import { useDispatch } from "react-redux";
 import axios from "axios";
 import { getAllCatagory } from "../../../Utils/config/axios.GetMethods";
+import { setSingleCourseDetails } from "../../../Slices/tutorSlice/courseSlice";
+import { tutorregister } from "../../../Slices/tutorSlice/tutorSlice";
+import { Form } from "react-hook-form";
+
+interface CourseFormInterface {
+  courseName: string;
+  courseDescription: string;
+  courseDuration: string;
+  courseFee: number;
+  photo: string;
+  category: string
+}
+interface CourseErrorInterface {
+  courseName: string;
+  courseDescription: string;
+  courseDuration: string;
+  courseFee: string;  
+  photo: string;
+  category: string;
+}
 
 function AddNewCourse() {
-    const [courseName, setCourseName] = useState<string>("");
-  const [courseDescription, setCourseDescription] = useState<string>("");
-  const [shortDescription, setShortDescription] = useState<string>("");
-  const [courseDuration, setCourseDuration] = useState<string>("");
-  const [category, setCategory] = useState<string>("");
-  const [coursefee, setCoursefee] = useState<string>("");
-  const [courseLevel, setCourseLevel] = useState<string>("");
-  const [image, setImage] = useState<File | null>(null);
-  const [catagory, setCatagory]: any = useState({});
-  const [CloudanaryURL, setCloudanaryURL] = useState("");
-  const { errors, handleSubmit, register } = useCourseValidation();
-
+  const dispatch=useDispatch()
   const navigate = useNavigate();
-
-  const tutorData = useSelector((state: any) => state.tutor.tutor);
-  const storedTutorId = tutorData?.tutorId;
-
   
-  type course = {
-    courseName: string;
-    courseDescription: string;
-    shortDescription: string;
-    courseDuration: string;
-    isApproved: boolean;
-    category: string;
-    coursefee: number;
-    instructor: string;
-    image: any;
-    courseLevel: string;
-    tutorId: string;
-  };
+  const [errors, setErrors] = useState<CourseErrorInterface>({
+    courseName: "",
+    courseDescription: "",
+    courseDuration: "",
+    courseFee:"",
+    photo:"",
+    category: "" 
+  });
+  const [img, setImg] = useState<File | null>(null);
+  const [category, setCategory] = useState<string[]>([]);
 
-  let file: any;
+  const { tutor } = useSelector((state: any) => state.tutor);
+  
+  
+
+  const [courseDetails, setCourseDetails] = useState<CourseFormInterface>({
+    courseName: "",
+    courseDescription: "",
+    courseDuration: "",
+    courseFee:0,
+    photo:"",
+    category:""
+  });
 
   useEffect(() => {
-
-    (async () => {
-      const response: any = await getAllCatagory();
-      console.log("this is catogary", response?.data);
-
-      if (response) {
-        setCatagory(response?.data?.categoryDetails);
+    const fetchCategories = async () => {
+      try {
+        const response: any = await getAllCatagory(); 
+        console.log(response.data,"----------category");
+        
+        if (response?.data) {
+          const data = response?.data?.categoryDetails.map((category: any) => category.categoryname);
+          setCategory(data);
+          console.log("Categories fetched and set:", data);
+        }
+      } catch (error) {
+        toast.error("Failed to fetch categories.");
       }
-    })();
+    };
+    
+    fetchCategories();
   }, []);
 
-  const tutorId = localStorage.getItem("tutorId");
+  const validateInput = (name: string, value: any) => { 
+    let errorMsg = '';
+    switch (name) {
+      case 'courseName':
+        errorMsg = !value.trim() ? 'Course name is required' : '';
+        break;
+      case 'courseDescription':
+        errorMsg = !value.trim() ? 'Course description is required' : '';
+        break;
+      case 'courseDuration':
+        errorMsg = !value.trim() ? 'Course duration is required' : '';
+        break;
+      case 'courseFee':
+        errorMsg = value <= 0 ? 'Course fee must be greater than 0' : '';
+        break;
+      case 'photo':
+        errorMsg = !value.trim() ? 'Photo is required' : '';
+        break;
+      case 'category':
+        errorMsg = !value.trim() ? 'Category is required' : '';
+        break;
+      case 'tutorName':
+        errorMsg = !value.trim() ? 'Tutor name is required' : '';
+        break;
+      case 'tutorEmail':
+        errorMsg = !value.trim() ? 'Email is required' : !/^\S+@\S+\.\S+$/.test(value) ? 'Email is not valid' : '';
+        break;
+      case 'phone':
+        errorMsg = !value.trim() ? 'Phone number is required' : !/^\d{10}$/.test(value) ? 'Phone number must be 10 digits' : '';
+        break;
+      default:
+        break
+    }
+    setErrors(prev => ({ ...prev, [name]: errorMsg }));
+    return errorMsg === '';
+};
+
+
+
+const handleChange = (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLSelectElement>) => {
+  const { name, value } = e.target;
+  setCourseDetails(prevDetails => ({ ...prevDetails, [name]: value }));
+  validateInput(name, value);
+};
+
+
+const handleImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files ? e.target.files[0] : null;
+  setImg(file);
+  
+};
+
+
+const upload = async () => {
+  
+   
+  if (Object.values(errors).every(error => error === '')) {
+    const formData = new FormData();
+    formData.append('courseName', courseDetails.courseName);
+    formData.append('courseDescription', courseDetails.courseDescription);
+    formData.append('courseDuration', courseDetails.courseDuration);
+    formData.append('courseFee', String(courseDetails.courseFee));
+    formData.append('category', courseDetails.category);
+    formData.append('tutor',tutor._id)
+    if (img) {
+      formData.append('image', img, 'Profile');
+    }
+
+    try {
+     
+      console.log(localStorage.getItem('Token'),'000000000000000000000');
+      const token=localStorage.getItem('Token')
+      const response = await axios.post('http://localhost:5000/tutor/addnewcourse', formData, { 
+        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        }
+      });
+      toast.success('Course added successfully!');
+     if(response.data.status){
+      console.log('SUCCES');
+      const course=response.data.data
+      dispatch(setSingleCourseDetails(course));
+      navigate("/tutor/home", {replace: true});
+      toast.success("Course Added")
+     }
+    } catch (error) {
+      toast.error('Failed to add course.');
+      console.error(error);
+    }
+  } else {
+    toast.error('Please fix the errors before submitting.');
+  }
+};
+
 
   return (
     <>
       {/* component */}
       {/* Tailwind Play: https://play.tailwindcss.com/qIqvl7e7Ww  */}
-      <div className="flex min-h-screen items-center justify-start bg-gradient-to-br from-sky-50 to-sky-300">
-        <div className="mx-auto w-full max-w-lg" style={{ marginTop: "-2rem" }}> {/* Adjusted inline style here */}
-          <h1 className="text-4xl font-medium">Contact us</h1>
-          <form action="https://api.web3forms.com/submit" className="mt-10">
-            {/* This is a working contact form. 
-            Get your free access key from: https://web3forms.com/  */}
-            <input
-              type="hidden"
-              name="access_key"
-              defaultValue="YOUR_ACCESS_KEY_HERE"
-            />
+      <div className="flex min-h-screen w-screen items-center justify-start bg-gradient-to-br from-sky-50 to-sky-300 fixed">
+        <div className="mx-auto w-full max-w-lg mt-[-3rem]"> {/* Adjusted inline style here */}
+          <h1 className="text-4xl font-medium text-sky-700">Create Course</h1>
+          <form  className="mt-10">
+          
+           
             <div className="grid gap-6 sm:grid-cols-2">
+              
               <div className="relative z-0">
+                
                 <input
                   type="text"
-                  name="name"
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  name="courseName"
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
                   placeholder=" "
+                  value={courseDetails.courseName}
+                  onChange={handleChange}
                 />
+                
+                {errors.courseName &&<p className="text-red-500 text-xs mt-1">{errors.courseName}</p> }
                 <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Course name
                 </label>
+                
+                
+                
               </div>
               
               <div className="relative z-0 col-span-2">
                 <textarea
-                  name="message"
+                  name="courseDescription"
                   rows={2}
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
                   placeholder=" "
-                  defaultValue={""}
+                  value={courseDetails.courseDescription}
+                  onChange={handleChange}
                 />
                 <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Description
                 </label>
-              </div>
-
-              <div className="relative z-0 col-span-2">
-                <textarea
-                  name="message"
-                  rows={2}
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
-                  placeholder=" "
-                  defaultValue={""}
-                />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
-                  Short Description
-                </label>
+                {errors.courseDescription && <p className="text-red-500 text-xs mt-1">{errors.courseDescription}</p>}
               </div>
               <div className="relative z-0">
-                <input
-                  type="text"
-                  name="category"
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
-                  placeholder=" "
-                />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
-                  Category
-                </label>
-              </div>
+  <select
+    name="category"
+    value={courseDetails.category}
+    onChange={handleChange}
+    className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+  >
+    <option value="">Select Category</option>
+    {category && category.map((category: string, index: number) => (
+      <option key={index} value={category}>
+        {category}
+      </option>
+    ))}
+  </select>
+  <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+    Category
+  </label>
+  {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
+</div>
+
     
 
               <div className="relative z-0">
                 <input
                   type="text"
-                  name="price"
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  name="courseFee"
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
                   placeholder=" "
+                  value={courseDetails.courseFee}
+                  onChange={handleChange}
                 />
                 <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Price
                 </label>
+                {errors.courseFee && <p className="text-red-500 text-xs mt-1">{errors.courseFee}</p>}
               </div>
 
               <div className="relative z-0">
                 <input
                   type="text"
-                  name="duration"
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  name="courseDuration"
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
                   placeholder=" "
+                  value={courseDetails.courseDuration}
+                  onChange={handleChange}
                 />
                 <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Duration
                 </label>
+                {errors.courseDuration && <p className="text-red-500 text-xs mt-1">{errors.courseDuration}</p>}
               </div>
 
               {/* Add image upload field */}
               <div className="relative z-0">
                 <input
                   type="file"
-                  name="courseImage"
+                  name="photo"
                   accept="image/*"
-                  className="peer block w-full appearance-none border-0 border-b border-gray-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  onChange={handleImage}
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
                 />
                 <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Upload Image
@@ -162,6 +286,10 @@ function AddNewCourse() {
             {/* Add submit button */}
             <button
               type="submit"
+              onClick={(e) => {
+                e.preventDefault();
+                upload();
+              }}
               className="mt-5 rounded-md bg-sky-600 px-10 py-2 text-white"
             >
               Add Course

@@ -38,7 +38,7 @@ const persistedAdminReducer = persistReducer(adminConfig, adminReducer);
 
 const store = configureStore({
   reducer: {
-    user: persistedStudentReducer,
+    student: persistedStudentReducer,
     tutor: persistedTutorReducer,
     admin: persistedAdminReducer,
     course: persistedCourseReducer,

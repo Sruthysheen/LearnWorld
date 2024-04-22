@@ -1,10 +1,13 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, Response, response } from "express";
 import bcrypt from "bcryptjs";
 import generateToken from "../../Utlitis/generateToken";
 import "dotenv/config";
 import Tutor from "../../models/tutorModel";
 import { sendMail } from "../../middleware/otpMail";
-import { uploadCloud } from "../../Utlitis/Cloudinary";
+import { uploadCloud} from "../../Utlitis/Cloudinary";
+import { protect } from "../../middleware/tutorMiddleware";
+import Course from "../../models/courseModel";
+import Category from "../../models/categoryModel";
 
 const appState = {
   otp: null as null | number,
@@ -53,17 +56,24 @@ const tutorRegistration = async (req: Request, res: Response) => {
 const verifyOtp = async (req: Request, res: Response) => {
   try {
     const { otp } = req.body;
+    console.log(otp,"---------------------------------------------------");
+    
     if (otp == req.session.otp) {
       const data = req.session.tutor;
       const addTutor = await Tutor.create(data);
       const token = generateToken(addTutor._id);
-      return res.status(200).json({
+      const datas={
         _id: addTutor?._id,
-        name: addTutor?.tutorname,
-        email: addTutor?.tutoremail,
+        tutorname: addTutor?.tutorname,
+        tutoremail: addTutor?.tutoremail,
         phone: addTutor?.phone,
         isBlocked: addTutor.isBlocked,
+        photo:"",
         token,
+      }
+      return res.status(200).json({
+        response:datas,
+        token:token
       });
     } else {
       res.status(500).json({ message: "Invalid OTP" });
@@ -90,14 +100,8 @@ const tutorLogin = async (req: Request, res: Response) => {
       const passwordMatch = await tutor.matchPassword(password);
       if (passwordMatch) {
         const token = generateToken(tutor._id);
-        return res.json({
-          _id: tutor._id,
-          name: tutor.tutorname,
-          email: tutor.tutoremail,
-          phone: tutor.phone,
-          isBlocked: tutor.isBlocked,
-          token,
-        });
+        
+        return res.json({response:tutor,token:token});
       }
     } else {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -150,9 +154,9 @@ const tutorGoogleAuthentication = async (req: Request, res: Response) => {
       console.log("hiiiii");
 
       
-      res.send({ userExist: true, token});
+      // res.send({ userExist: true, token});
 
-      // res.send({ userExist: true, token ,response});
+      res.send({ userExist: true, token ,response});
 
     }
   }
@@ -190,10 +194,12 @@ const tutorForgotPassword = async (req: Request, res: Response) => {
 const verifyForgotOTP = async (req: Request, res: Response) => {
   try {
     const { otp } = req.body;
-    console.log(otp, ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
-    console.log(req.session.otp, "+++++++++++++++");
+    // const email=req.session.tutor.tutoremail
+    console.log(otp,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+    console.log(req.session.otp,"+++++++++++++++");
 
     if (otp == req.session.otp) {
+      // const tutor=await Tutor.findOne({ email });
       return res.status(200).json({ message: "Success" });
     } else {
       return res.status(400).json({ message: "Please correct password" });
@@ -254,18 +260,192 @@ const tutorNewPassword = async (req: Request, res: Response) => {
 
 const editProfile = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const file: Express.Multer.File | undefined = req.file;
-    if (file) {
-      const buffer: Buffer = file.buffer;
-      const link = await uploadCloud(buffer);
-      console.log(link);
-      res.status(200).json({ status: true });
-    }
-  } catch (e) {
-    res.status(500).json({ status: true });
+    
+      const tutorId = req.tutor?._id;
+      console.log(tutorId);
+      console.log(req.body,'==body ');
+      console.log(req.file,'Filessss');
+      
+      
+      
+      const { tutorname, tutoremail, phone } = req.body; 
+      if (req.file) {
+          const file: Express.Multer.File = req.file;
+          const buffer: Buffer = file.buffer;
+          const imageUrl = await uploadCloud(buffer, file.originalname); 
+console.log(imageUrl,'URL ');
+
+  
+          const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, {
+              tutorname,
+              tutoremail,
+              phone,
+              photo: imageUrl, 
+          },{new:true});
+
+          if (updatedTutor) {
+              res.status(200).json({ status: true ,data:updatedTutor});
+          } else {
+              res.status(404).json({ status: false, message: "Tutor not found" });
+          }
+      } else {
+    
+          const updatedTutor = await Tutor.findByIdAndUpdate(tutorId, {
+              tutorname,
+              tutoremail,
+              phone,
+          },{new:true});
+
+          if (updatedTutor) {
+              res.status(200).json({ status: true,data:updatedTutor });
+          } else {
+              res.status(404).json({ status: false, message: "Tutor not found" });
+          }
+      }
+  } catch (error) {
+      console.error("Error updating profile:", error);
+      res.status(500).json({ status: false, message: "Failed to update profile" });
   }
 };
 
+
+
+const editCourse = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const courseId = req.params.id;
+    console.log(courseId,"........................");
+   
+    
+    const {
+      courseName,
+      courseDescription,
+      courseDuration,
+      category,
+      courseFee,
+      tutor
+    } = req.body;
+    const cate = JSON.parse(category) 
+    console.log(req.body,"=====================");
+    
+
+    let imageUrl = "";
+
+    if (req.file) {
+      const file: Express.Multer.File = req.file;
+      const buffer: Buffer = file.buffer;
+      imageUrl = await uploadCloud(buffer, file.originalname);
+      console.log(imageUrl, 'URL ');
+    }
+    console.log(cate);
+    
+    const categoryObj = await Category.findOne({categoryname:cate.categoryname});
+console.log(categoryObj,'***********');
+
+    if (!categoryObj) {
+      return res.status(400).json({ status: false, message: "Category not found" });
+    }
+
+    const updatedCourseData: any = {
+      courseName,
+      courseDescription,
+      courseDuration,
+      category: categoryObj._id,
+      courseFee,
+    };
+
+    if (imageUrl) {
+      updatedCourseData.photo = imageUrl;
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(courseId, updatedCourseData, { new: true });
+
+    if (updatedCourse) {
+      console.log(req.body, "Body data");
+      res.status(200).json({ status: true, data: updatedCourse });
+    } else {
+      res.status(404).json({ status: false, message: "Course not found" });
+    }
+
+  } catch (error) {
+    console.error("Error updating course:", error);
+    res.status(500).json({ status: false, message: "Failed to update course" });
+  }
+}
+
+
+
+
+
+
+
+const addCourses = async (req: Request, res: Response) => {
+  console.log("I'm adding course");
+
+  try {
+    const {
+      courseName,
+      courseDescription,
+      courseDuration,
+      category,
+      courseFee, 
+      tutor
+    } = req.body;
+
+    if (req.file) {
+      const file: Express.Multer.File = req.file;
+      const buffer: Buffer = file.buffer;
+      const imageUrl = await uploadCloud(buffer, file.originalname);
+if(imageUrl){
+  console.log(req.body, "Body data");
+const categorys:any=await Category.findOne({categoryname:category})
+      const course = await Course.create({
+        courseName,
+        courseDescription,
+        category:categorys._id,
+        courseFee, 
+        courseDuration,
+        photo: imageUrl, 
+        tutor
+      });
+      const response=await course.save();
+      if (response) {
+        console.log("sending req to frnd",response);
+        return res.status(200).json({status:true,data:response});
+       
+      } else {
+        res.status(400).json({ status:false, message: "Invalid Data Entry" });
+      }
+}
+    
+    } else {
+      res.status(400).json({ status:false,message: "No file uploaded" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ status:false, message: "Internal Server Error" });
+  }
+};
+
+
+const getAlltutorCourse = async (req:Request,res:Response)=>{
+  try{
+    const id=req.params.id
+    const courseDetails = await Course.find({tutor:id}).populate('category').exec();
+  console.log("Fetched Course Details:", courseDetails);
+    if(courseDetails){
+      res.status(200).json({
+        courseDetails,message:"courseDetails"
+      })
+    }else{
+      return res.status(400).json({
+        error:"no course available "
+      })
+    }
+  }
+  catch(error){
+    console.log(error);
+  }
+}
 
 
 const tutorLogout = async (req:Request, res:Response) => {
@@ -280,6 +460,9 @@ const tutorLogout = async (req:Request, res:Response) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
+
 export {
   tutorRegistration,
   tutorLogin,
@@ -291,5 +474,8 @@ export {
   tutorNewPassword,
   tutorGoogleAuthentication,
   editProfile,
-  tutorLogout
+  tutorLogout,
+  addCourses,
+  getAlltutorCourse,
+  editCourse
 };

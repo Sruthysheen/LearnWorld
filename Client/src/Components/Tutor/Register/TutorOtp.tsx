@@ -3,13 +3,15 @@ import { OtpVerificationTutor } from '../../../Utils/config/axios.PostMethods';
 import { resendOtpTutor, tutorOtpExpiry } from '../../../Utils/config/axios.GetMethods';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { useDispatch } from 'react-redux';
+import { tutorregister } from '../../../Slices/tutorSlice/tutorSlice';
 
 function TutorOtp() {
 
     const [otp, setOtp] = useState('');
     const [counter, setCounter] = React.useState(15);
     const navigate = useNavigate();
-
+const dispatch=useDispatch()
 
     const handleSubmit: any =async(event: any) =>{
         try {
@@ -19,6 +21,7 @@ function TutorOtp() {
             if(res.status==200) {
               localStorage.setItem("Token",`${res.data.token}`);
               localStorage.setItem("isVerified",'true')
+              dispatch(tutorregister(res.data.response));
               navigate("/tutor/home", {replace: true});
             }
             } catch (error) {

@@ -12,16 +12,17 @@ function TutorNavbar() {
   const [showDropdown, setShowDropdown] = useState(false);
 
   const navigate = useNavigate();
-  const { admin } = useSelector((state: any) => state.admin);
-  
+
+  const { tutor } = useSelector((state: any) => state.tutor);
   useEffect(() => {
     const data = localStorage.getItem("Token");
+    console.log(data)
     if (data) {
       setLoggedIn(true);
     } else {
       setLoggedIn(false);
     }
-  }, [admin]);
+  }, [tutor]);
 
   const handleLogout = async () => {
     try {
@@ -57,10 +58,10 @@ function TutorNavbar() {
               <Link to="" className="py-4 px-2 text-sky-800 font-semibold">
                Students
               </Link>
-              <Link to="" className="py-4 px-2 text-sky-800 font-semibold">
+              <Link to="/tutor/getallcourse/:id" className="py-4 px-2 text-sky-800 font-semibold">
                 My Course
               </Link>
-              <Link to="/tutor/tutornewcourse" className="py-4 px-2 text-sky-800 font-semibold">
+              <Link to="/tutor/addnewcourse" className="py-4 px-2 text-sky-800 font-semibold">
                 Course
               </Link>
               </div>
@@ -70,11 +71,20 @@ function TutorNavbar() {
           <div className="flex items-center space-x-4">
             <div className="relative">
               <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center">
-                <img
+                {tutor && tutor.photo ? (
+                  <img
+                  src={tutor.photo}
+                  alt="Profile"
+                  className="h-8 w-8 rounded-full"
+                />
+                ):(
+                  <img
                   src="/public/Profile.jpg"
                   alt="Profile"
                   className="h-8 w-8 rounded-full"
                 />
+                )}
+                
               </button>
               {showDropdown && (
                 <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">

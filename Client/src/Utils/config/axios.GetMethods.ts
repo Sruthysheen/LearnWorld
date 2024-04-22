@@ -89,6 +89,16 @@ export const resendOtp = async() => {
     };
     return await apiRequest(config);
   };
+
+
+
+  export const getAllCourses = async (tutorId : any ) =>{
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/tutor/getallcourse/${tutorId}`,
+    }
+    return await apiRequest(config);
+  }
   
 
   //Admin----------------------------------------------------------------------------------
@@ -138,7 +148,20 @@ export const getAllCatagory=async()=>{
   
   const config: AxiosRequestConfig = {
     method: "GET",
-    url: `/admin/adminCategory`,
+    url: `/admin/admincategory`,
   };
   return await apiRequest(config);
+  
+}
+
+
+export const getAllCatagoryForView=async()=>{
+  console.log('INSide the APII');
+  
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `/admin/admincategoryview`,
+  };
+  const response:any = await apiRequest(config);
+  return response.data || [];
 }

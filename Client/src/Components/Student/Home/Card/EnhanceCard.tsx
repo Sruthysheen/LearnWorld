@@ -11,15 +11,15 @@ function EnhanceCard() {
         {/* Repeatable Card Component */}
         {[
           {
-            image: "https://img.freepik.com/free-photo/pasta-spaghetti-with-shrimps-sauce_1220-5072.jpg?w=2000&t=st=1678041911~exp=1678042511~hmac=e4aa55e70f8c231d4d23832a611004f86eeb3b6ca067b3fa0c374ac78fe7aba6",
+            image: "public/CardImg4.jpg",
             title: "Expert Instruction: Empowering Excellence Through Expert Instruction."
           },
           {
-            image: "https://img.freepik.com/free-photo/pasta-spaghetti-with-shrimps-sauce_1220-5072.jpg?w=2000&t=st=1678041911~exp=1678042511~hmac=e4aa55e70f8c231d4d23832a611004f86eeb3b6ca067b3fa0c374ac78fe7aba6",
+            image: "public/CardImg3.png",
             title: "Video Tutorials : Dive into the World of Video Tutorials."
           },
           {
-            image: "https://img.freepik.com/free-photo/pasta-spaghetti-with-shrimps-sauce_1220-5072.jpg?w=2000&t=st=1678041911~exp=1678042511~hmac=e4aa55e70f8c231d4d23832a611004f86eeb3b6ca067b3fa0c374ac78fe7aba6",
+            image: "public/CardImg2.jpg",
             title: "Lifetime Access : Your Journey to Lifelong Learning Begins Here!"
           },
           {

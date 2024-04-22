@@ -22,6 +22,7 @@
     "@types/use-sync-external-store": "^0.0.6",
     "apexcharts": "^3.48.0",
     "axios": "^1.6.7",
+    "date-fns": "^3.6.0",
     "firebase": "^10.10.0",
     "jwt-decode": "^4.0.0",
     "react": "^18.2.0",

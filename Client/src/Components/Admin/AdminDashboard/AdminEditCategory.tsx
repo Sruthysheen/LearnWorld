@@ -11,7 +11,7 @@ import { string } from "zod";
 function AdminEditCategory() {
   interface Category {
     _id: string;
-    categoryName: string;
+    categoryname: string;
     description: string;
    
     }
