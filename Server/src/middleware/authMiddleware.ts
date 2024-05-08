@@ -24,7 +24,9 @@ declare global{
 
 
 const protect = asyncHandler(
+    
     async(req:Request, res:Response, next:NextFunction) =>{
+        console.log(req.headers,'ppp[pp');
         const token = req.headers.authorization?.split(" ")[1];
         const JWT_SECRET = process.env.JWT_SECRET as string;
 
@@ -32,6 +34,7 @@ const protect = asyncHandler(
         {
             try {
                 const verifiedToken = jwt.verify(token,JWT_SECRET) as JwtPayload;
+                console.log(verifiedToken,'-----');
 
                 const studentId: string = verifiedToken.student_id;
 

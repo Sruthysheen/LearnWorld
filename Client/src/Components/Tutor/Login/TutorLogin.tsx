@@ -12,6 +12,7 @@ import { Auth } from 'firebase/auth';
 import { auth } from '../../../Utils/config/firebase.config';
 import { useGoogleSignIn } from '../../../Utils/customHooks/customHooks';
 import { tutorGoogleAuthVerification } from '../../../Utils/config/axios.GetMethods';
+import LoadingSpinner from "../../Common/LoadingSpinner";
 
 function TutorLogin() {
 
@@ -20,6 +21,7 @@ function TutorLogin() {
     const {errors, handleSubmit, register} = useTutorValidate();
   
     const {tutor} = useSelector((state:any) => state.tutor);
+    const [loading, setLoading] = useState(false);
   
     useEffect(()=>{
       if(tutor) {
@@ -69,6 +71,7 @@ function TutorLogin() {
   
     const handleLogin = async(loginData: loginTutor) =>{
       try {
+        setLoading(true);
         const response:any = await tutorLogin(loginData);
   
         if(response.status === 200) {
@@ -82,6 +85,8 @@ function TutorLogin() {
           }
         }
       } catch (error) {  
+      }finally {
+        setLoading(false);
       }
     };
 
@@ -90,6 +95,7 @@ function TutorLogin() {
     <>
     {/* component */}
      <div className="bg-gradient-to-b from-blue-300 h-screen w-screen fixed">
+     {loading && <LoadingSpinner />}
     <div className="absolute top-3 left-0 flex items-center" style={{ paddingLeft: '3rem' }}>
 
 </div>

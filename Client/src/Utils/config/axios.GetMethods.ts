@@ -1,5 +1,5 @@
 import { AxiosRequestConfig } from "axios";
-import { apiRequest } from "./axios.config";
+import { api, apiRequest } from "./axios.config";
 
 
 //student---------------------------------------------------------------------------
@@ -40,6 +40,39 @@ export const resendOtp = async() => {
     };
     return await apiRequest(config);
   };
+  
+
+  export const getAllStudentCourses = async()=>{
+    try {
+      const config: AxiosRequestConfig = {
+        method: "GET",
+        url:"/student/getcourses"
+      }
+      return await apiRequest(config)
+    } catch (error) {
+        throw(error);
+    }
+  }
+
+  export const getCartItems = async(studentId:any)=>{
+    const config = {
+      method: "GET",
+      url: `/student/cart/${studentId}`,
+    };
+    return await apiRequest(config);
+  };
+
+
+  export const getWishlistItems = async(studentId:any)=>{
+    const config = {
+      method: "GET",
+      url: `/student/wishlist/${studentId}`,
+    };
+    return await apiRequest(config);
+  };
+
+
+
   
 
 
@@ -155,13 +188,13 @@ export const getAllCatagory=async()=>{
 }
 
 
-export const getAllCatagoryForView=async()=>{
-  console.log('INSide the APII');
+// export const getAllCatagoryForView=async()=>{
+//   console.log('INSide the APII');
   
-  const config: AxiosRequestConfig = {
-    method: "GET",
-    url: `/admin/admincategoryview`,
-  };
-  const response:any = await apiRequest(config);
-  return response.data || [];
-}
+//   const config: AxiosRequestConfig = {
+//     method: "GET",
+//     url: `/admin/admincategoryview`,
+//   };
+//   const response:any = await apiRequest(config);
+//   return response.data || [];
+// }

@@ -175,7 +175,7 @@ const handleEditCategory=(id:string)=>{
   </li>
 </ul>
 <div className="flex justify-end mt-5">
-    <a href="/admin/adminaddcategory" className="px-5 py-3 bg-sky-500 text-white text-sm uppercase font-medium rounded mr-2">
+    <a href="/admin/adminaddcategory" className="px-5 py-3 bg-sky-600 text-white text-sm uppercase font-medium rounded mr-2">
         <button>
             Add Category
         </button>

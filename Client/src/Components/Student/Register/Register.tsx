@@ -12,12 +12,14 @@ import { auth } from '../../../Utils/config/firebase.config';
 import { useGoogleSignIn } from '../../../Utils/customHooks/customHooks';
 import { register as registerAction } from '../../../Slices/studentSlice/studentSlice';
 import { googleAuthVerification } from '../../../Utils/config/axios.GetMethods';
+import LoadingSpinner from '../../Common/LoadingSpinner';
 
 
 function Register() {
 
 const navigate = useNavigate();
 const dispatch = useDispatch();
+const [loading, setLoading] = useState(false);
 
 
   
@@ -47,7 +49,7 @@ const dispatch = useDispatch();
               console.log(res.data.token, "res");
               localStorage.setItem("Token", `${res.data.token}`);
               localStorage.setItem("isVerified",'true')
-              dispatch(registerAction(res.data.token));
+              dispatch(registerAction(res.data.response));
               navigate("/", { replace: true });
             } else {
               console.log("user not exist");
@@ -68,14 +70,17 @@ const dispatch = useDispatch();
   
   const handleRegister = async (data: studentSignUp) => {
     try {
+      setLoading(true);
         const response: any = await studentRegistration(data);
         console.log(response)
         if (response.status === 200) {
             navigate("/otp");}
     } catch (error) {
-        // Handle any errors that occur during the registration process
         console.error("Registration error:", error);
     }
+    finally {
+      setLoading(false); 
+  }
 };
 
 
@@ -88,6 +93,7 @@ const dispatch = useDispatch();
     <>
     {/* component */}
     <div className="bg-gradient-to-b from-indigo-200 h-screen w-screen fixed">
+    {loading && <LoadingSpinner />}
     <div className="absolute top-3 left-0 flex items-center" style={{ paddingLeft: '3rem' }}>
   <img src="public/Logo.png" alt="Logo" className="w-8 h-8 mr-2" />
   <p className="text-2xl text-sky-800 font-medium">LearnWorld</p>

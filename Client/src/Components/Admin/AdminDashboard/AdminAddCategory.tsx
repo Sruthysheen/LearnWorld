@@ -15,6 +15,8 @@ const navigate = useNavigate();
 const handleAddCategory = async (data: CategoryInfo) => {
   try {
     const response:any = await addCategory({ ...data });
+  console.log(response.status);
+  
     if (response.status === 200) {
       toast.success(response.data.message);
       navigate('/admin/admincategory');
@@ -33,8 +35,8 @@ return (
   <>
     <>
       {/* component */}
-      <div className="w-96 bg-gray-300 h-screen">
-        <div className="bg-gradient-to-b from-blue-50 to-blue-300 h-96" />
+      <div className="bg-gray-300 h-screen">
+        <div className="bg-gradient-to-b from-blue-50 to-blue-300 h-80" />
         <div className="max-w-5xl mx-auto px-6 sm:px-6 lg:px-8 mb-12">
           <div className="bg-sky-700 w-full shadow rounded p-8 sm:p-12 -mt-72">
             <p className="text-3xl font-bold leading-7 text-center text-white">

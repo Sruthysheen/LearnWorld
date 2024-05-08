@@ -14,10 +14,14 @@ import PrivatePage from '../Components/PrivateRouter/PrivatePage';
 import MyCourseTutorPage from '../Pages/Tutor/MyCourseTutorPage';
 import SingleCourseViewPage from '../Pages/Tutor/SingleCourseViewPage';
 import EditCoursePage from '../Pages/Tutor/EditCoursePage';
+import AddLessonPage from '../Pages/Tutor/AddLessonPage';
+import Footer from '../Components/Student/Home/Footer';
+import EditLessonPage from '../Pages/Tutor/EditLessonPage';
 
 const TutorRouter = () => {
     const location = useLocation();
-    const showNavbar = !['/tutor/tutorlogin', '/tutor/tutorregister','/tutor/home'].includes(location.pathname);  
+    const showNavbar = !['/tutor/tutorlogin', '/tutor/tutorregister', '/tutor/home'].includes(location.pathname);  
+    const showFooter = !['/tutor/tutorlogin', '/tutor/tutorregister', '/tutor/home'].includes(location.pathname);
     return (
         <>
             {showNavbar && <TutorNavbar />}
@@ -30,14 +34,17 @@ const TutorRouter = () => {
                 <Route path="/tutornewpassword" element={<TutorNewPasswordPage/>} />
                 
                 <Route element={<PrivatePage isStudent={false} />}> 
-                <Route path="/home" element={<TutorHomePage/>} />
-                <Route path="/tutorprofile" element={<TutorProfilePage/>} />
-                <Route path="/addnewcourse" element={<TutorAddNewCoursePage/>} />
-                <Route path="/getallcourse/:id" element={<MyCourseTutorPage/>} /> 
-                <Route path="/viewcourse" element={<SingleCourseViewPage/>} />
-                <Route path="/editcourse/:id" element={<EditCoursePage/>} />
+                    <Route path="/home" element={<TutorHomePage/>} />
+                    <Route path="/tutorprofile" element={<TutorProfilePage/>} />
+                    <Route path="/addnewcourse" element={<TutorAddNewCoursePage/>} />
+                    <Route path="/getallcourse/:id" element={<MyCourseTutorPage/>} /> 
+                    <Route path="/viewcourse" element={<SingleCourseViewPage/>} />
+                    <Route path="/editcourse/:id" element={<EditCoursePage/>} />
+                    <Route path="/addlesson" element={<AddLessonPage/>} />
+                    <Route path="/editlesson/:lessonId" element={<EditLessonPage/>} />
                 </Route>
             </Routes> 
+            {showFooter && <Footer />}
         </>
     )
 }

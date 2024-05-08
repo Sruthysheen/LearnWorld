@@ -1,9 +1,18 @@
-import {Request, Response}  from "express";
+import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import generateToken from "../../Utlitis/generateToken";
 import "dotenv/config";
 import Student from "../../models/studentModel";
 import {sendMail} from "../../middleware/otpMail";
+import Course from "../../models/courseModel";
+import Category from "../../models/categoryModel";
+import CartModel from '../../models/cartModel';
+import WishListModel from '../../models/wishlistModel';
+import { uploadCloud} from "../../Utlitis/Cloudinary";
+import { protect } from '../../middleware/authMiddleware';
+
+
+
 
 
 const appState = {
@@ -74,14 +83,19 @@ const verifyOtp = async(req: Request, res: Response) =>{
         const data=req.session.student
         const addStudent = await Student.create(data);
         const token = generateToken(addStudent._id);
-        return res.status(200).json({
+
+        const datas={
             _id: addStudent?._id,
             name: addStudent?.studentname,
             email: addStudent?.studentemail,
             phone: addStudent?.phone,
             isBlocked:addStudent.isBlocked,
             token,
-        });
+        }
+        return res.status(200).json({
+            response:datas,
+            token:token
+        })
        } else {
         res.status(500).json({message:"Invalid OTP"});
        }
@@ -90,9 +104,6 @@ const verifyOtp = async(req: Request, res: Response) =>{
         
     }
 }
-
-
-
 
 
 const otpExpiry=async(req:Request,res:Response)=>{
@@ -123,14 +134,7 @@ const studentLogin = async(req: Request, res: Response) =>{
         if(passwordMatch)
         {
             const token = generateToken(student._id);
-            return res.json({
-                _id:student._id,
-                name:student.studentname,
-                email:student.studentemail,
-                phone:student.phone,
-                isBlocked:student.isBlocked,
-                token,
-            });
+            return res.json({response:student,token:token});
         } 
     } else {
         return res.status(401).json({message:"Invalid email or password"})
@@ -179,7 +183,7 @@ const GoogleAuthentication = async (req: Request, res: Response) => {
         const token = generateToken(response._id);
         console.log("hiiiii");
   
-        res.send({ userExist: true, token });
+        res.send({ userExist: true, token, response });
       }
     }
   };
@@ -282,7 +286,171 @@ const newPassword = async (req: Request, res: Response) => {
 };
 
 
+const getAllCourses = async (req: Request, res: Response) => {
+    try {
+      const courseDetails = await Course.find().populate('category').populate('tutor').exec();
+      if (courseDetails.length > 0) {
+        return res.status(200).json({ courseDetails });
+      } else {
+        return res.status(404).json({ message: "There are no courses" });
+      }
+    } catch (error) {
+      console.log(error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+  
+  
+  const addToCart = async(req:Request, res:Response)=>{
+    try {
+        const { studentId, courseId } = req.body; 
+        const cartItemExisted = await CartModel.findOne({student:studentId,course:courseId})
+        if(cartItemExisted){
+            return res.status(400).json({message:"Course already existed in cart"})
+        } 
+        else{
+            const newCartItem = new CartModel({student:studentId,course:courseId});
+            await newCartItem.save();
+            return res.status(200).json({message:"Course added to cart successfully"})
+        }
+    } catch (error) {
+        console.error("Error Occur while Adding to cart", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
 
+  }
+
+const getCartItems = async(req:Request, res:Response) =>{
+    const studentId = req.params.studentId;
+    console.log(studentId,"........................");
+    
+    try {
+        const cartItems = await CartModel.find({ student: studentId }).populate("course");
+    console.log(cartItems, "items");
+
+    res.status(200).json(cartItems);
+    } catch (error) {
+        console.error("Error fetching cart Items", error);
+        res.status(500).json({ error: "Internal server Error" });
+    }
+}
+
+
+const removeCartItem = async(req:Request,res:Response)=>{
+    try {
+        const cartItemId = req.params.cartItemId;
+        const removedItem = await CartModel.findByIdAndDelete({_id:cartItemId})
+        if (!removedItem) {
+            return res.status(404).json({ error: "Cart item not found" });
+          }
+          res.status(200).json({ message: "Course removed from the cart" });
+    } catch (error) {
+        console.error("Error removing course from cart", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+const addToWishlist = async(req:Request, res:Response)=>{
+    try {
+        const { studentId, courseId } = req.body; 
+        const itemExisted = await WishListModel.findOne({student:studentId,course:courseId})
+        if(itemExisted){
+            return res.status(400).json({message:"Course already existed in Wishlist"})
+        } 
+        else{
+            const newItem = new WishListModel({student:studentId,course:courseId});
+            await newItem.save();
+            return res.status(200).json({message:"Course added to wishlist successfully"})
+        }
+    } catch (error) {
+        console.error("Error Occur while Adding to wishlist", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+
+const  getWishlistItems = async(req:Request, res:Response)=>{
+    const studentId = req.params.studentId;
+    console.log(studentId,"........................");
+    
+    try {
+        const wishlistItems = await WishListModel.find({ student: studentId }).populate("course");
+    console.log(wishlistItems, "items");
+
+    res.status(200).json(wishlistItems);
+    } catch (error) {
+        console.error("Error fetching cart Items", error);
+        res.status(500).json({ error: "Internal server Error" });
+    }
+}
+
+
+
+const removeWishlistItem = async(req:Request, res:Response)=>{
+    try {
+        const wishlistItemId = req.params.wishlistItemId;
+        const removedItem = await WishListModel.findByIdAndDelete({_id:wishlistItemId})
+        if (!removedItem) {
+            return res.status(404).json({ error: "Wishlist item not found" });
+          }
+          res.status(200).json({ message: "Course removed from the wishlist" });
+    } catch (error) {
+        console.error("Error removing course from wishlist", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+}
+
+
+
+const StudentEditProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      
+        const studentId = req.student?._id;
+        console.log(studentId);
+        console.log(req.body,'==body ');
+        console.log(req.file,'Filessss');
+        
+        
+        
+        const { studentname, studentemail, phone } = req.body; 
+        if (req.file) {
+            const file: Express.Multer.File = req.file;
+            const buffer: Buffer = file.buffer;
+            const imageUrl = await uploadCloud(buffer, file.originalname); 
+  console.log(imageUrl,'URL ');
+  
+    
+            const updatedStudent = await Student.findByIdAndUpdate(studentId, {
+                studentname,
+                studentemail,
+                phone,
+                photo: imageUrl, 
+            },{new:true});
+  
+            if (updatedStudent) {
+                res.status(200).json({ status: true ,data:updatedStudent});
+            } else {
+                res.status(404).json({ status: false, message: "Tutor not found" });
+            }
+        } else {
+      
+            const updatedStudent = await Student.findByIdAndUpdate(studentId, {
+                studentname,
+                studentemail,
+                phone,
+            },{new:true});
+  
+            if (updatedStudent) {
+                res.status(200).json({ status: true,data:updatedStudent });
+            } else {
+                res.status(404).json({ status: false, message: "Student not found" });
+            }
+        }
+    } catch (error) {
+        console.error("Error updating profile:", error);
+        res.status(500).json({ status: false, message: "Failed to update profile" });
+    }
+  };
 
 
 
@@ -309,5 +477,13 @@ export {
     newPassword,
     studentLogout,
     otpExpiry,
-    GoogleAuthentication
+    GoogleAuthentication,
+    getAllCourses,
+    addToCart,
+    getCartItems,
+    removeCartItem,
+    addToWishlist,
+    getWishlistItems,
+    removeWishlistItem,
+    StudentEditProfile
 }

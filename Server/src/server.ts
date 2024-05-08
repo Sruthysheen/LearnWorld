@@ -10,6 +10,7 @@ import cors from "cors";
 import nocache from "nocache";
 import path from "path";
 import morgan from 'morgan'
+import paymentRouter from "./routes/paymentRouter/paymentRouter";
 
 const app:Express = express()
 const port:number = Number(process.env.PORT)
@@ -62,6 +63,7 @@ connectDb.connect();
 app.use('/student', studentRouter);
 app.use('/tutor', tutorRouter);
 app.use('/admin', adminRouter);
+app.use('/payment',paymentRouter);
 
 
 

@@ -7,9 +7,9 @@ import { tutorlogout } from '../../../Slices/tutorSlice/tutorSlice';
 function TutorNavbar() {
   const dispatch = useDispatch();
   const [loggedIn, setLoggedIn] = useState(false);
+  const [showCourseDropdown, setShowCourseDropdown] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [showDropdown, setShowDropdown] = useState(false);
 
   const navigate = useNavigate();
 
@@ -61,42 +61,39 @@ function TutorNavbar() {
               <Link to="/tutor/getallcourse/:id" className="py-4 px-2 text-sky-800 font-semibold">
                 My Course
               </Link>
-              <Link to="/tutor/addnewcourse" className="py-4 px-2 text-sky-800 font-semibold">
-                Course
-              </Link>
+              <div className="relative">
+                <button onClick={() => setShowCourseDropdown(!showCourseDropdown)} className="py-4 px-2 text-sky-800 font-semibold focus:outline-none">
+                  Course
+                </button>
+                {showCourseDropdown && (
+                  <div className="absolute mt-2 w-40 bg-indigo-200 border border-gray-300 rounded-md shadow-lg z-10">
+                    <Link to="/tutor/addnewcourse" className="block px-4 py-2 text-sm text-sky-800 hover:bg-gray-100">Add Course</Link>
+                    <Link to="/tutor/addlesson" className="block px-4 py-2 text-sm text-sky-800 hover:bg-gray-100">Add Lesson</Link>
+                  </div>
+                )}
+              </div>
               </div>
         
         {/* Profile Image and Dropdown */}
         {loggedIn && (
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <button onClick={() => setShowDropdown(!showDropdown)} className="flex items-center">
-                {tutor && tutor.photo ? (
-                  <img
-                  src={tutor.photo}
-                  alt="Profile"
-                  className="h-8 w-8 rounded-full"
-                />
-                ):(
-                  <img
-                  src="/public/Profile.jpg"
-                  alt="Profile"
-                  className="h-8 w-8 rounded-full"
-                />
-                )}
-                
-              </button>
-              {showDropdown && (
-                <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
-                  <Link to="/tutor/tutorprofile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</Link>
-                  <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Logout
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <button onClick={() => setShowProfileDropdown(!showProfileDropdown)} className="flex items-center focus:outline-none">
+                    {tutor && tutor.photo ? (
+                      <img src={tutor.photo} alt="Profile" className="h-8 w-8 rounded-full" />
+                    ) : (
+                      <img src="/public/Profile.jpg" alt="Profile" className="h-8 w-8 rounded-full" />
+                    )}
                   </button>
+                  {showProfileDropdown && (
+                    <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
+                      <Link to="/tutor/tutorprofile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</Link>
+                      <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+              </div>
+            )}
 
         
         

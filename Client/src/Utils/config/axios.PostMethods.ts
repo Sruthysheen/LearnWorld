@@ -93,6 +93,43 @@ export const studentNewPassword = async (newPassword: String) => {
 };
 
 
+export const addToCart = async(studentId:string,courseId:string)=>{
+    const data = {
+      studentId: studentId,
+      courseId: courseId,
+      
+    }
+
+    const config: AxiosRequestConfig ={
+      method:"POST",
+      url: `/student/addtocart`,
+      data: data,
+    }
+    return await apiRequest(config);
+  }
+
+export const addToWishlist = async(studentId:string, courseId:string)=>{
+  const data = {
+    studentId: studentId,
+    courseId: courseId,
+  }
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/student/addtowishlist`,
+    data: data,
+  }
+  return await apiRequest(config);
+}
+  
+
+export const stripePayment = async(cartItems:any)=>{
+  const config: AxiosRequestConfig = {
+    method:"POST",
+    url: `/payment/stripepayment`,
+    data: {cartItems},
+  }
+  return await apiRequest(config);
+}
 
 
  

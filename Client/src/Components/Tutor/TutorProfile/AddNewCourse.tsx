@@ -94,15 +94,6 @@ function AddNewCourse() {
       case 'category':
         errorMsg = !value.trim() ? 'Category is required' : '';
         break;
-      case 'tutorName':
-        errorMsg = !value.trim() ? 'Tutor name is required' : '';
-        break;
-      case 'tutorEmail':
-        errorMsg = !value.trim() ? 'Email is required' : !/^\S+@\S+\.\S+$/.test(value) ? 'Email is not valid' : '';
-        break;
-      case 'phone':
-        errorMsg = !value.trim() ? 'Phone number is required' : !/^\d{10}$/.test(value) ? 'Phone number must be 10 digits' : '';
-        break;
       default:
         break
     }
@@ -138,7 +129,7 @@ const upload = async () => {
     formData.append('category', courseDetails.category);
     formData.append('tutor',tutor._id)
     if (img) {
-      formData.append('image', img, 'Profile');
+      formData.append('image', img, img.name);
     }
 
     try {
@@ -157,7 +148,7 @@ const upload = async () => {
       console.log('SUCCES');
       const course=response.data.data
       dispatch(setSingleCourseDetails(course));
-      navigate("/tutor/home", {replace: true});
+      navigate("/tutor/getallcourse/:id", {replace: true});
       toast.success("Course Added")
      }
     } catch (error) {
@@ -174,7 +165,7 @@ const upload = async () => {
     <>
       {/* component */}
       {/* Tailwind Play: https://play.tailwindcss.com/qIqvl7e7Ww  */}
-      <div className="flex min-h-screen w-screen items-center justify-start bg-gradient-to-br from-sky-50 to-sky-300 fixed">
+      <div className="flex min-h-screen w-screen items-center justify-start bg-gradient-to-br from-sky-200 to-white">
         <div className="mx-auto w-full max-w-lg mt-[-3rem]"> {/* Adjusted inline style here */}
           <h1 className="text-4xl font-medium text-sky-700">Create Course</h1>
           <form  className="mt-10">
@@ -193,10 +184,11 @@ const upload = async () => {
                   onChange={handleChange}
                 />
                 
-                {errors.courseName &&<p className="text-red-500 text-xs mt-1">{errors.courseName}</p> }
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+               
+                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Course name
                 </label>
+                {errors.courseName &&<p className="text-red-500 text-xs mt-1">{errors.courseName}</p> }
                 
                 
                 
@@ -211,7 +203,7 @@ const upload = async () => {
                   value={courseDetails.courseDescription}
                   onChange={handleChange}
                 />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Description
                 </label>
                 {errors.courseDescription && <p className="text-red-500 text-xs mt-1">{errors.courseDescription}</p>}
@@ -221,16 +213,16 @@ const upload = async () => {
     name="category"
     value={courseDetails.category}
     onChange={handleChange}
-    className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+    className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-sky-600 focus:border-blue-600 focus:outline-none focus:ring-0"
   >
-    <option value="">Select Category</option>
+    <option text-sky-500 value=""></option>
     {category && category.map((category: string, index: number) => (
       <option key={index} value={category}>
         {category}
       </option>
     ))}
   </select>
-  <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+  <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
     Category
   </label>
   {errors.category && <p className="text-red-500 text-xs mt-1">{errors.category}</p>}
@@ -247,7 +239,7 @@ const upload = async () => {
                   value={courseDetails.courseFee}
                   onChange={handleChange}
                 />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Price
                 </label>
                 {errors.courseFee && <p className="text-red-500 text-xs mt-1">{errors.courseFee}</p>}
@@ -262,7 +254,7 @@ const upload = async () => {
                   value={courseDetails.courseDuration}
                   onChange={handleChange}
                 />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Duration
                 </label>
                 {errors.courseDuration && <p className="text-red-500 text-xs mt-1">{errors.courseDuration}</p>}
@@ -275,9 +267,9 @@ const upload = async () => {
                   name="photo"
                   accept="image/*"
                   onChange={handleImage}
-                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0"
+                  className="peer block w-full appearance-none border-0 border-b border-sky-500 bg-transparent py-2.5 px-0 text-sm text-sky-600 focus:border-blue-600 focus:outline-none focus:ring-0"
                 />
-                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-gray-500 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
+                <label className="absolute top-3 -z-10 origin-[0] -translate-y-6 scale-75 transform text-sm text-sky-600 duration-300 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:scale-100 peer-focus:left-0 peer-focus:-translate-y-6 peer-focus:scale-75 peer-focus:text-blue-600 peer-focus:dark:text-blue-500">
                   Upload Image
                 </label>
               </div>

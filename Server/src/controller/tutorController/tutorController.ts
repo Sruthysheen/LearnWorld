@@ -447,6 +447,81 @@ const getAlltutorCourse = async (req:Request,res:Response)=>{
   }
 }
 
+const addNewLesson = async(req:Request,res:Response)=>{
+  try {
+    console.log(req.body,"---------------------------",req.file);
+    
+    const {category,description,title,courseId} = req.body;
+
+      const file: any = req?.file;
+      const buffer: Buffer = file.buffer;
+      console.log(file,"FILEE");
+      
+      const imageUrl = await uploadCloud(buffer, file.originalname);
+
+      if(imageUrl){
+        const video=imageUrl
+        const lessonAddedCourse = await Course.findByIdAndUpdate(
+          courseId,
+          { $push: { lessons: { courseId: courseId,category, description, title, video} } },
+          { new: true }
+        );
+  if(lessonAddedCourse){
+    return res.status(200).json(lessonAddedCourse);
+  } else {
+    return res.status(400).json({error:"Course not found"});
+  }
+      }
+    
+    
+  } catch (error) {
+    res.status(500);
+    throw error;
+  }
+}
+
+
+const editLesson = async (req: Request, res: Response) => {
+  try {
+    
+    const lessonId = req.params.lessonId; 
+    console.log(lessonId,"...................");
+    
+    const {courseId, category, description, title } = req.body;
+    console.log(req.body);
+    
+
+    
+    const file: any = req.file;
+    const videoUrl = file ? await uploadCloud(file.buffer, file.originalname) : undefined;
+
+    // Construct lesson update data
+    const updateData: any = {};
+    if(courseId) updateData.courseId = courseId;
+    if (category) updateData.category = category;
+    if (description) updateData.description = description;
+    if (title) updateData.title = title;
+    if (videoUrl) updateData.video = videoUrl;
+
+    const updatedCourse = await Course.findOneAndUpdate(
+      { _id: courseId, "lessons._id": lessonId }, 
+      { $set: { "lessons.$": updateData } }, 
+      { new: true }
+    );
+
+    if(updatedCourse){
+      return res.status(200).json(updatedCourse);
+    }
+    else {
+      return res.status(400).json({error:"Course not updated"})
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+
 
 const tutorLogout = async (req:Request, res:Response) => {
   try {
@@ -460,6 +535,8 @@ const tutorLogout = async (req:Request, res:Response) => {
     return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
+
 
 
 
@@ -477,5 +554,7 @@ export {
   tutorLogout,
   addCourses,
   getAlltutorCourse,
-  editCourse
+  editCourse,
+  addNewLesson,
+  editLesson
 };

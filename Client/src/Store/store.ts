@@ -7,6 +7,7 @@ import studentReducer from "../Slices/studentSlice/studentSlice";
 import tutorReducer from "../Slices/tutorSlice/tutorSlice";
 import adminReducer from "../Slices/adminSlice/adminSlice";
 import courseReducer from "../Slices/tutorSlice/courseSlice";
+import cartReducer from '../Slices/studentSlice/cartSlice';
 
 
 const tutorConfig = {
@@ -29,11 +30,17 @@ const adminConfig = {
   storage 
 };
 
+const cartConfig={
+  key : 'cart',
+  
+  storage 
+}
 
 const persistedTutorReducer = persistReducer(tutorConfig, tutorReducer);
 const persistedCourseReducer = persistReducer(courseConfig, courseReducer);
 const persistedStudentReducer = persistReducer(studentConfig, studentReducer);
 const persistedAdminReducer = persistReducer(adminConfig, adminReducer);
+const persistedCartReducer=persistReducer(cartConfig , cartReducer);
 
 
 const store = configureStore({
@@ -42,7 +49,14 @@ const store = configureStore({
     tutor: persistedTutorReducer,
     admin: persistedAdminReducer,
     course: persistedCourseReducer,
-  }
+    cart:persistedCartReducer
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ['persist/PERSIST'],
+      },
+    }),
 });
 
 const persistedStore = persistStore(store);

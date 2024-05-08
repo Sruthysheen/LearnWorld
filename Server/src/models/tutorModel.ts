@@ -8,6 +8,7 @@ interface InTutor extends Document {
     phone: number;
     password: string;
     photo: string;
+    courses: mongoose.Schema.Types.ObjectId,
     createdAt: Date;
     isBlocked: boolean;
     matchPassword(enteredPassword: string): Promise<boolean>;
@@ -32,6 +33,10 @@ const tutorSchema = new Schema<InTutor>(
         {
           type: String,
         },
+        courses: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "courseModel",
+          },
         createdAt:{
             type: Date,
             required: true,

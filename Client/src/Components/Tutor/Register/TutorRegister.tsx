@@ -14,11 +14,13 @@ import { Auth } from "firebase/auth";
 import { auth } from '../../../Utils/config/firebase.config';
 import { tutorregister } from '../../../Slices/tutorSlice/tutorSlice';
 import { tutorGoogleAuthVerification } from '../../../Utils/config/axios.GetMethods';
+import LoadingSpinner from '../../Common/LoadingSpinner';
 
 function tutorRegister() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { handleSubmit, errors, register } = useTutorValidate();
+    const [loading, setLoading] = useState(false);
 
     type tutorSignup = {
         tutorname: string;
@@ -72,6 +74,7 @@ function tutorRegister() {
 
     const handleTutorRegister = async (data: tutorSignup) => {
         try {
+          setLoading(true);
             const response: any = await tutorRegistration(data);
             console.log(response)
             if (response.status === 200) {
@@ -79,12 +82,16 @@ function tutorRegister() {
         } catch (error) {
             console.error("Registration error:", error);
         }
+        finally {
+          setLoading(false);
+        }
     };
     
     return (
       <>
       {/* component */}
       <div className="bg-gradient-to-b from-blue-300 h-screen w-screen fixed">
+      {loading && <LoadingSpinner />}
       <div className="absolute top-3 left-0 flex items-center" style={{ paddingLeft: '3rem' }}>
     <img src="/public/Logo.png" alt="Logo" className="w-8 h-8 mr-2" />
     <p className="text-2xl text-sky-700 font-medium">LearnWorld</p>

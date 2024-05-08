@@ -183,14 +183,17 @@ const loginAdmin = async (req: Request, res: Response) => {
 
   const addAdminCategory = async(req:Request, res:Response) =>{
     try {
-      const { id,categoryname,description } = req.body;
-      const categoryExist = await Category.findOne({
-        categoryname : {$regex: new RegExp(`^${categoryname}$`, "i")} , 
-        id: {$ne: id} })
+      const {categoryname,description } = req.body;
 
-        if(categoryExist){
-          return res.status(400).json({message:"Category already exist"})
-        }
+      console.log(req.body);
+      
+      const categoryExist = await Category.findOne({
+        categoryname: { $regex: new RegExp(`^${categoryname}$`, 'i') }
+      });
+      if (categoryExist) {
+        return res.status(400).json({message: "Category already exists" });
+    }
+    
       const newCategory = await Category.create({
         categoryname:categoryname,
         description:description
@@ -205,7 +208,7 @@ const loginAdmin = async (req: Request, res: Response) => {
         return res.status(400).json({error:"Invalid category data"})
       }
     } catch (error) {
-      res.status(400).json({error:"Invalid category"})
+      res.status(500).json({ message: "Server error" });
     }
   }
 
@@ -227,22 +230,22 @@ const loginAdmin = async (req: Request, res: Response) => {
   };
   
 
-  const listAllCategoryForView = async (req: Request, res: Response) => {
-    try {
-      const categoryDetails = await Category.find({ isDeleted: false }).exec();
+  // const listAllCategoryForView = async (req: Request, res: Response) => {
+  //   try {
+  //     const categoryDetails = await Category.find({ isDeleted: false }).exec();
   
-      if (categoryDetails) {
-        return res.status(200).json({
-          data: categoryDetails 
-        });
-      } else {
-        return res.status(400).json({ message: "Category does not exist" });
-      }
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Internal Server Error" });
-    }
-  };
+  //     if (categoryDetails) {
+  //       return res.status(200).json({
+  //         data: categoryDetails 
+  //       });
+  //     } else {
+  //       return res.status(400).json({ message: "Category does not exist" });
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //     return res.status(500).json({ message: "Internal Server Error" });
+  //   }
+  // };
 
 
 
@@ -357,6 +360,6 @@ console.log(req.body);
           getCategoryById,
           editCategory,
           deleteCategory,
-          listAllCategoryForView
+          
           
         }

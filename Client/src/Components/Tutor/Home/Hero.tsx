@@ -14,7 +14,7 @@ function Hero() {
             Teach what you know and help learners explore their interests, gain new skills, and advance their careers.
           </p>
           {/* Using Link to navigate to the specified route */}
-          <Link to="/tutor/tutornewcourse">
+          <Link to="/tutor/addnewcourse">
             <button className="inline-block mt-10 px-10 py-3 bg-red-500 text-lg text-white font-semibold">
               Get Started
             </button>

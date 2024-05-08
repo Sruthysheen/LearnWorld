@@ -11,39 +11,27 @@ import { Auth } from 'firebase/auth';
 import { auth } from '../../../Utils/config/firebase.config';
 import { useGoogleSignIn } from '../../../Utils/customHooks/customHooks';
 import { googleAuthVerification } from '../../../Utils/config/axios.GetMethods';
+import { register as registerAction } from '../../../Slices/studentSlice/studentSlice';
+import LoadingSpinner from "../../Common/LoadingSpinner";
 
 function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {errors, handleSubmit, register} = useLoginValidate();
 
-  const {student} = useSelector((state:any) => state.student);
+ 
+ 
+  
+  const [loading, setLoading] = useState(false);
+
   
 
  
-  useEffect(()=>{
-    if(student) {
-      navigate("/",{replace: true});
-    }
-  },[]);
-
-  const handleLogin = async(loginData: loginStudent) =>{
-    try {
-      const response:any = await studentLogin(loginData);
-
-      if(response.status === 200) {
-        dispatch(login(response.data.token));
-        localStorage.setItem("Token",`${response.data.token}`);
-        localStorage.setItem("isVerified",'true')
-        navigate("/", {replace: true});
-      } else {
-        if(response.response.status === 404) {
-          toast.error(response.response.data.message);
-        }
-      }
-    } catch (error) {  
-    }
-  };
+  // useEffect(()=>{
+  //   if(student) {
+  //     navigate("/",{replace: true});
+  //   }
+  // },[]);
 
 
   const googleSignInStudent = async (auth: Auth) => {
@@ -57,7 +45,7 @@ function Login() {
             if (res.data.userExist) {
               localStorage.setItem("Token", `${res.data.token}`);
               localStorage.setItem("isVerified",'true')
-              dispatch(login(res.data.token));
+              dispatch(login(res.data.response));
               navigate("/", { replace: true });
             } else {
               console.log("user not exist");
@@ -75,13 +63,42 @@ function Login() {
   };
 
 
+  const handleLogin = async(loginData: loginStudent) =>{
+    try {
+      setLoading(true);
+      const response:any = await studentLogin(loginData);
+      console.log(response,"this is student response");
+      
+
+      if(response.status === 200) {
+        dispatch(login(response.data.token));
+        localStorage.setItem("Token",`${response.data.token}`);
+        localStorage.setItem("isVerified",'true')
+        dispatch(registerAction(response.data.response));
+        navigate("/", {replace: true});
+      } else {
+        if(response.response.status === 404) {
+          toast.error(response.response.data.message);
+        }
+      }
+    } catch (error) {  
+    }finally {
+      setLoading(false);
+    }
+    
+  };
+
+  const {student} = useSelector((state:any) => state.student);
+  console.log(student,"----------------------------------------this is student login");
+
+
   return (
   
  <>
 
   {/* component */}
   <div className="bg-gradient-to-b from-indigo-200 h-screen w-screen fixed">
-     {/* Text at the top left */}
+  {loading && <LoadingSpinner />}
      <div className="absolute top-3 left-0 flex items-center" style={{ paddingLeft: '3rem' }}>
   <img src="public/Logo.png" alt="Logo" className="w-8 h-8 mr-2" />
   <p className="text-2xl text-sky-800 font-medium">LearnWorld</p>

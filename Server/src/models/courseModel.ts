@@ -8,15 +8,16 @@ export interface Course extends Document {
     photo:string,
     tutor: mongoose.Schema.Types.ObjectId,  
     students: mongoose.Schema.Types.ObjectId[],
-    lessons: mongoose.Schema.Types.ObjectId[], 
+    lessons: string[], 
     isApproved:boolean,
     isLessonCompleted:boolean,
     isEnrolled:boolean,
     courseFee:number,  
     createdAt:Date,
-    updatedAt:Date
+    updatedAt:Date,
+    video:string,
 }
-const courSchema =new mongoose.Schema({
+const courSchema =new Schema<Course>({
     courseName:{
         type:String,
         required:true
@@ -29,6 +30,11 @@ const courSchema =new mongoose.Schema({
         type: String,
         required:true
     },     
+    category:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref: "category", 
+        required: true   
+    },
     courseFee:{
         type:Number,
         required:true
@@ -48,11 +54,7 @@ const courSchema =new mongoose.Schema({
     photo:[{
         type:String
     }],
-    category:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref: "category", 
-        required: true   
-    },
+   
     tutor:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Tutor",
@@ -63,10 +65,29 @@ const courSchema =new mongoose.Schema({
         ref: 'Student',
       }],
     lessons: [{
+       title: {
+        type: String,
+       },
+       description: {
+        type: String,
+       },
+       category: {
+        type: String,
+        required: true,
+       },
+       video: {
+        type: String,
+       },
+       isActive: {
+        type: Boolean,
+        default: true,
+      },
+      courseId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'lessonModel',
-      }],     
-        createdAt:{
+        required: true,
+      },
+      },],     
+    createdAt:{
         type:Date,
         default:Date.now
     },

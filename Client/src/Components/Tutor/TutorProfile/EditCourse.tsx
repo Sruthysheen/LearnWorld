@@ -165,7 +165,7 @@ function EditCourse() {
     console.log(courseInfo,"-------");
     
     console.log(courseDetails,courseDetails,category, "+++++++");
-
+    if (Object.values(errors).every(error => error === '')) {
     const formData = new FormData();
     formData.append("courseName", courseInfo.courseName);
     formData.append("courseDescription", courseInfo.courseDescription);
@@ -174,7 +174,7 @@ function EditCourse() {
     formData.append("category", JSON.stringify(courseInfo.category));
     formData.append("tutor", tutor._id);
     if (img) {
-      formData.append("image", img, "Profile");
+      formData.append("image", img, img.name);
     }
 
     try {
@@ -195,13 +195,16 @@ function EditCourse() {
         console.log("SUCCES");
         const course = response.data.data;
         dispatch(setSingleCourseDetails(course));
-        navigate("/tutor/home", { replace: true });
+        navigate("/tutor/getallcourse/:id", { replace: true });
         toast.success("course Updated ");
       }
     } catch (error) {
       toast.error("Failed to update profile.");
       console.error(error);
     }
+  } else {
+    toast.error('Please fix the errors before submitting.');
+  }
   };
 
   const changeCateName = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -220,7 +223,7 @@ function EditCourse() {
       <>
         {/* component */}
         {/* Tailwind Play: https://play.tailwindcss.com/qIqvl7e7Ww  */}
-        <div className="flex min-h-screen w-screen items-center justify-start bg-gradient-to-br from-sky-50 to-sky-300 fixed">
+        <div className="flex min-h-screen w-screen items-center justify-start bg-gradient-to-br from-sky-200 to-white">
           <div className="mx-auto w-full max-w-lg mt-[-3rem]">
             {" "}
             {/* Adjusted inline style here */}

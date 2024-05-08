@@ -90,7 +90,7 @@ function TutorBio() {
       formData.append('tutoremail', tutorDetails.tutoremail);
       formData.append('phone', tutorDetails.phone);
       if (img) {
-        formData.append('image', img, 'Profile');
+        formData.append('image', img, img.name);
       }
 
       try {
@@ -114,6 +114,7 @@ function TutorBio() {
         // });
         dispatch(tutorregister(tutor));
         toast.success("user Updated ")
+        
        }
       } catch (error) {
         toast.error('Failed to update profile.');
@@ -185,7 +186,7 @@ function TutorBio() {
                 <input
                   type="file"
                   id="avatar"
-                  name="avatar"
+                  name="image"
                   accept="image/png, image/jpeg"
                   className="my-2 py-2 px-4 rounded-md bg-white text-gray-600 w-full outline-none focus:ring-2 focus:ring-blue-600"
                   onChange={handleImage}

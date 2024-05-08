@@ -7,6 +7,7 @@ interface InStudent extends Document {
     studentemail: string;
     phone: number;
     password: string;
+    photo: string;
     createdAt: Date;
     isBlocked: boolean;
     matchPassword(enteredPassword: string): Promise<boolean>
@@ -31,6 +32,9 @@ const studentSchema = new Schema<InStudent>(
             type:String,
             
         },
+        photo: {
+            type: String
+          },
         createdAt:{
             type:Date,
             required:true,

@@ -2,11 +2,11 @@ import React from 'react'
 
 function Footer() {
   return (
-    <>
+  
     <>
   {/* component */}
-  <div className="flex items-end w-full min-h-screen bg-white">
-    <footer className="w-full text-gray-700 bg-indigo-100 body-font">
+  
+    <footer className="w-full text-gray-700 bg-indigo-100 body-font mt-8">
       <div className="container flex flex-col flex-wrap px-5 py-24 mx-auto md:items-center lg:items-start md:flex-row md:flex-no-wrap">
        
         <div className="flex flex-wrap flex-grow mt-10 -mb-10 text-center md:pl-20 md:mt-0 md:text-left">
@@ -108,8 +108,8 @@ function Footer() {
         </div>
       </div>
     </footer>
-  </div>
-</>
+ 
+
 
     </>
   )

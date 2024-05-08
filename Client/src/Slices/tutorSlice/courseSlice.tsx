@@ -9,7 +9,6 @@ export interface Course {
     image: string[];
     coursefee: number;
     courseDuration: string;
-    courseLevel: string;
     category: string;
   }
   courseName: string;
@@ -25,17 +24,15 @@ phone: string
       }
 
       tutorName: string,
-courseLessons:string[]
+lessons:string[]
 }
 
 export interface Lesson {
   _id: string;
   title: string
- Description:string
-         courseName: String
-         video:String 
-         courseDuration: string;
-    courseLevel: string;
+ description:string
+  video:String 
+  category: string;
  
 }
 

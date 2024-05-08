@@ -10,9 +10,9 @@ import { toast } from 'react-toastify';
 
 
 
+
 function AdminLogin() {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+ 
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -31,6 +31,7 @@ function AdminLogin() {
 
       const handleLogin = async (data: loginAdmin) =>{
         try {
+       
             const response:any = await adminLogin(data);
             if(response.status===200){
                 dispatch(login (response.data.token))
@@ -50,8 +51,10 @@ function AdminLogin() {
             }
         } catch (error) {
             
-        }
+        } 
       }
+
+     
 
 
   return (
