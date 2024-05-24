@@ -5,8 +5,9 @@ import { useNavigate } from "react-router";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { setLessons, setSingleCourseDetails } from "../../../Slices/tutorSlice/courseSlice";
-import { getAllCatagory, getAllCourses } from "../../../Utils/config/axios.GetMethods";
+import { getAllCatagory, getAllCatagoryTutor, getAllCourses } from "../../../Utils/config/axios.GetMethods";
 import { useParams } from "react-router-dom";
+import { editLesson } from "../../../Utils/config/axios.PostMethods";
 
 interface LessonFormInterface {
     courseId: string;
@@ -36,7 +37,7 @@ function EditLesson() {
       });
       
       let { lessonId } = useParams();
-      console.log(lessonId,"................................");
+      console.log(lessonId,".....555555555555...........................");
       const { tutor } = useSelector((state: any) => state.tutor);
 
       console.log(tutor,"//////////////////////");
@@ -44,14 +45,14 @@ function EditLesson() {
       const { courseDetails } = useSelector((state: any) => state.course);
       console.log(courseDetails,"==============================++++++++++");
       
-      const lessons = courseDetails.lessons;
+      const lessons = courseDetails?.lessons;
       console.log(lessons,"=================================");
       
       // const lesson1 = lessons.find((lesson1:any) => lesson1._id === lessonId);
 
       const fetchCategory = async () => {
         try {
-          const response: any = await getAllCatagory();
+          const response: any = await getAllCatagoryTutor();
           if (response?.data) {
             const data = response?.data?.categoryDetails.map(
               (category: any) => category.categoryname
@@ -130,6 +131,11 @@ function EditLesson() {
       };
     
       const upload = async () => {
+        if (!lessonId) {
+          toast.error("Invalid lesson ID");
+          return;
+        }
+    
         const formData = new FormData();
         console.log("Lesson courseId:", lesson.courseId);
         formData.append("courseId", lesson.courseId);
@@ -144,25 +150,19 @@ function EditLesson() {
         try {
           console.log(localStorage.getItem("Token"), "000000000000000000000");
           const token = localStorage.getItem("Token");
-          const response = await axios.post(
-            `http://localhost:5000/tutor/editlesson/${lessonId}`,
-            formData,
-            {
-              withCredentials: true,
-              headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "multipart/form-data",
-              },
-            }
-          );
+          const response = await editLesson(formData, lessonId)
+          console.log(response,'-----------------------------------');
+          
           toast.success("Lesson updated successfully!");
-          if (response.data.status) {
+          if (response.status===200) {
             console.log("SUCCES");
+            console.log(response,'THISIIIII');
+            
             const updatedCourse = response.data.data;
             const lessons = updatedCourse.lessons;
             dispatch(setSingleCourseDetails(updatedCourse)); 
             dispatch(setLessons(lessons));
-            navigate("/tutor/getallcourse/:id", { replace: true });
+            navigate("/tutor/getallcourse");
             toast.success("Lesson updated");
           }
         } catch (error) {

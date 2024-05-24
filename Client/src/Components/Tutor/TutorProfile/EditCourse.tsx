@@ -4,8 +4,9 @@ import { useNavigate } from "react-router";
 import axios from "axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
-import { getAllCatagory } from "../../../Utils/config/axios.GetMethods";
+import {getAllCatagoryTutor } from "../../../Utils/config/axios.GetMethods";
 import { setSingleCourseDetails } from "../../../Slices/tutorSlice/courseSlice";
+import { editCourse } from "../../../Utils/config/axios.PostMethods";
 
 interface CourseFormInterface {
   courseName: string;
@@ -68,7 +69,7 @@ function EditCourse() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response: any = await getAllCatagory();
+        const response: any = await getAllCatagoryTutor();
         console.log(response.data, "----------category");
 
         if (response?.data) {
@@ -179,23 +180,13 @@ function EditCourse() {
 
     try {
       const token = localStorage.getItem("Token");
-      const response = await axios.post(
-        `http://localhost:5000/tutor/editcourse/${courseId}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await editCourse(formData, courseId);
       toast.success("Course edited successfully!");
       if (response.data.status) {
         console.log("SUCCES");
         const course = response.data.data;
         dispatch(setSingleCourseDetails(course));
-        navigate("/tutor/getallcourse/:id", { replace: true });
+        navigate("/tutor/getallcourse", { replace: true });
         toast.success("course Updated ");
       }
     } catch (error) {

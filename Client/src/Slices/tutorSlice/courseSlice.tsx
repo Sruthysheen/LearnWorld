@@ -6,15 +6,15 @@ export interface Course {
   courseId: {
     courseName: string;
     courseDescription: string;
-    image: string[];
-    coursefee: number;
+    photo: string[];
+    courseFee: number;
     courseDuration: string;
     category: string;
   }
   courseName: string;
   courseDescription: string;
-  image: string[];
-  coursefee: number;
+  photo: string[];
+  courseFee: number;
 
 tutor: {
       tutorName: string,

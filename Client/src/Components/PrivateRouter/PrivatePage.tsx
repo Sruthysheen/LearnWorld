@@ -19,7 +19,7 @@ const privatePage: React.FC<PrivatePageProps> = ({isStudent}) => {
         if(student) {
             return <Outlet/>
         } else {
-            return <Navigate to={'/'}/>
+            return <Navigate to={'/login'}/>
         }
     } else {
         if(tutor) {

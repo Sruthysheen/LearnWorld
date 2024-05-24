@@ -77,6 +77,7 @@ function TutorLogin() {
         if(response.status === 200) {
           dispatch(tutorlogin(response.data.token));
           localStorage.setItem("Token",`${response.data.token}`);
+          localStorage.setItem("isVerified",'true')
           dispatch(tutorregister(response.data.response));
           navigate("/tutor/home", {replace: true});
         } else {

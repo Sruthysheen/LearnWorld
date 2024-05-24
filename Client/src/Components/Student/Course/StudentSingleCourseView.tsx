@@ -37,24 +37,24 @@ function StudentSingleCourseView() {
     }
   }, [currentVideo]);
 
-  const handleAddToCart = async()=>{
-    console.log(studentId,"----------studentId");
+  const handleAddToCart = async () => {
+    console.log(studentId, "----------studentId");
     
-    if(studentId){
-      try {
-      const response:any=await addToCart(studentId,courseId)
-      console.log(response,"..............");
-      toast.success(response.data.message);
-      
-
-    } catch (error) {
-      console.error("Error occur while adding to cart", error);
-      toast.error("Course alredy existed in the cart")
-    }}
-    else {
-      toast.error("Please log in to add the course to your cart.");
+    if (studentId) {
+        try {
+            const response: any = await addToCart(studentId, courseId);
+            console.log(response, "..............");
+            toast.success(response.data.message);
+        } catch (error: any) {
+            console.error("Error occurred while adding to cart", error);
+            const errorMessage = error.response?.data?.message || "An error occurred. Please try again.";
+            toast.error(errorMessage);
+        }
+    } else {
+        toast.error("Please log in to add the course to your cart.");
     }
-  }
+}
+
 
   const handleAddToWishlist = async()=>{
     console.log(studentId,"----------studentId");
@@ -79,7 +79,7 @@ function StudentSingleCourseView() {
 
   return (
     <>
-      <div className="h-screen flex flex-col md:flex-row items-center bg-cover bg-center"
+      <div className="flex flex-col md:flex-row items-center bg-cover bg-center overflow-auto"
            style={{ backgroundImage: 'url(/public/BG2.png)' }}>
         <div className="w-full md:w-1/2 py-5 md:py-10 px-5 md:px-10 text-center md:text-left text-sky-800 -mt-6">
           <h1 className="text-2xl md:text-5xl font-medium mb-4">{courseDetails.courseName}</h1>
@@ -88,6 +88,26 @@ function StudentSingleCourseView() {
           <p className="text-base md:text-md mb-2 font-bold">Course Fee: ₹{courseDetails.courseFee}</p>
           <p className="text-base md:text-md mb-2 font-bold">Course Duration: {courseDetails.courseDuration}</p>
           <p className="text-base md:text-md mb-2 font-bold">Last Updated: {format(parseISO(courseDetails.updatedAt), 'MMMM d, yyyy')}</p>
+    <div className="mt-6">
+    <h3 className="text-lg font-bold mb-2 text-sky-600 underline">Lessons for you...</h3>
+    
+    
+    <ul className="max-h-96 overflow-y-auto">
+
+        {courseDetails?.lessons && courseDetails.lessons.map((lesson: any, index: number) => (
+            <li key={index} className="p-1 flex justify-between">
+                <div className="flex-1">
+                    <span className="text-sky-600">{index + 1}. {lesson.title}</span>
+                </div>
+                <div className="flex-1 text-sky-600">
+                    {lesson.description.split('\n').join('<br/>')}
+                </div>
+            </li>
+        ))}
+    </ul>
+</div>
+
+
           <div className="flex justify-center md:justify-start space-x-3 mt-4">
             <Link to="#" className="bg-sky-500 text-white py-3 px-6 rounded-full hover:bg-indigo-600"
              onClick={handleAddToCart}>
@@ -113,7 +133,7 @@ function StudentSingleCourseView() {
 >
   <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143q.09.083.176.171a3 3 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15" />
 </svg></Link>
-            <Link to="#" className="bg-sky-500 text-white py-2 px-6 rounded-full hover:bg-indigo-600">Enroll Now</Link>
+            {/* <Link to="#" className="bg-sky-500 text-white py-2 px-6 rounded-full hover:bg-indigo-600">Enroll Now</Link> */}
           </div>
         </div>
         <div className="w-full md:w-1/2 px-5 md:px-10">

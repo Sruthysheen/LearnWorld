@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
-import generateToken from "../../Utlitis/generateToken";
+import {generateAccessToken,generateRefreshToken} from "../../Utlitis/generateToken";
 import "dotenv/config";
 import Student from "../../models/studentModel";
 import {sendMail} from "../../middleware/otpMail";
@@ -9,7 +9,11 @@ import Category from "../../models/categoryModel";
 import CartModel from '../../models/cartModel';
 import WishListModel from '../../models/wishlistModel';
 import { uploadCloud} from "../../Utlitis/Cloudinary";
-import { protect } from '../../middleware/authMiddleware';
+import { isAuth } from '../../middleware/authMiddleware';
+import Stripe from "stripe";
+import orderModel from "../../models/orderModel";
+import jwt from "jsonwebtoken";
+import Tutor from '../../models/tutorModel';
 
 
 
@@ -82,7 +86,7 @@ const verifyOtp = async(req: Request, res: Response) =>{
        {
         const data=req.session.student
         const addStudent = await Student.create(data);
-        const token = generateToken(addStudent._id);
+        const token = generateAccessToken(addStudent._id);
 
         const datas={
             _id: addStudent?._id,
@@ -133,8 +137,10 @@ const studentLogin = async(req: Request, res: Response) =>{
         const passwordMatch= await student.matchPassword(password);
         if(passwordMatch)
         {
-            const token = generateToken(student._id);
-            return res.json({response:student,token:token});
+            const accessToken = generateAccessToken(student._id);
+            const refreshToken =generateRefreshToken(student._id)
+            req.session.accessToken = accessToken;
+            return res.json({response:student,token:refreshToken});
         } 
     } else {
         return res.status(401).json({message:"Invalid email or password"})
@@ -163,6 +169,34 @@ const resendOtp = async (req: Request, res: Response) => {
 };
 
 
+const refreshTokenCreation = async(req:Request,res:Response)=>{
+    try {
+        const token = req.session.accessToken
+         console.log(token,"ACESSSSSS");
+    
+    if(!token)return  res.status(403).json('token is not found')
+     let  payload:any
+    jwt.verify(token, process.env.JWT_SECRET as string, (err: any, decode: any) => {
+        if (err) {
+          return { status: false, message: "error in jwt sign" };
+        } else {
+            payload = decode;
+        }
+      });
+
+      if (!payload.student_id)return { status: false, message: "payload is not found" };
+
+      const refreshToken = generateRefreshToken(payload.student_id);
+      console.log(refreshToken,'REFRSH TOKEN ');
+      
+      res.status(200).json( { status: true, token:refreshToken });
+    } catch (error) {
+        
+    }
+}
+
+
+
 const GoogleAuthentication = async (req: Request, res: Response) => {
     const inComingEmailForVerification = req.query.email;
     console.log(inComingEmailForVerification, "incoming email");
@@ -180,7 +214,7 @@ const GoogleAuthentication = async (req: Request, res: Response) => {
      })
      const response=await user.save() 
       if (response) {
-        const token = generateToken(response._id);
+        const token = generateAccessToken(response._id);
         console.log("hiiiii");
   
         res.send({ userExist: true, token, response });
@@ -288,7 +322,7 @@ const newPassword = async (req: Request, res: Response) => {
 
 const getAllCourses = async (req: Request, res: Response) => {
     try {
-      const courseDetails = await Course.find().populate('category').populate('tutor').exec();
+      const courseDetails = (await Course.find().sort({createdAt:-1}).populate('category').populate('tutor').exec());
       if (courseDetails.length > 0) {
         return res.status(200).json({ courseDetails });
       } else {
@@ -301,24 +335,29 @@ const getAllCourses = async (req: Request, res: Response) => {
   };
   
   
-  const addToCart = async(req:Request, res:Response)=>{
+  const addToCart = async (req: Request, res: Response) => {
     try {
         const { studentId, courseId } = req.body; 
-        const cartItemExisted = await CartModel.findOne({student:studentId,course:courseId})
-        if(cartItemExisted){
-            return res.status(400).json({message:"Course already existed in cart"})
-        } 
-        else{
-            const newCartItem = new CartModel({student:studentId,course:courseId});
-            await newCartItem.save();
-            return res.status(200).json({message:"Course added to cart successfully"})
+        
+        const alreadyEnrolled = await orderModel.findOne({ courseId: courseId, studentId: studentId });
+        if (alreadyEnrolled) {
+            return res.status(400).json({ message: "Student is already enrolled in this course" });
         }
+        const cartItemExisted = await CartModel.findOne({ student: studentId, course: courseId });
+        if (cartItemExisted) {
+            return res.status(400).json({ message: "Course already exists in the cart" });
+        } 
+        const newCartItem = new CartModel({ student: studentId, course: courseId });
+        await newCartItem.save();
+        
+        return res.status(200).json({ message: "Course added to cart successfully" });
+        
     } catch (error) {
-        console.error("Error Occur while Adding to cart", error);
+        console.error("Error occurred while adding to cart", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
+};
 
-  }
 
 const getCartItems = async(req:Request, res:Response) =>{
     const studentId = req.params.studentId;
@@ -452,6 +491,206 @@ const StudentEditProfile = async (req: Request, res: Response, next: NextFunctio
     }
   };
 
+  require("dotenv").config();
+const stripeSecretKey = process.env.STRIPE_KEY as string;
+console.log(stripeSecretKey, "Keyy");
+
+  const stripe = new Stripe(stripeSecretKey, {
+    apiVersion: "2024-04-10",
+});
+
+  const stripePayment = async (req: Request, res: Response) => {
+    try {
+      console.log(req.body, "bodyyyyyyyyyyyyyyy");
+  
+      const line_items = req.body.cartItems.map((item: any) => {
+        console.log(item, "ONE ITEM");
+  
+        return {
+          price_data: {
+            currency: "INR",
+            product_data: {
+              name: item?.course[0]?.courseName,
+              images: item?.course[0]?.photo,
+              description: item?.course[0]?.courseDescription,
+              metadata: {
+                id: item._id,
+              },
+            },
+            unit_amount: item?.course[0]?.courseFee * 100,
+          },
+          quantity:1,
+        };
+      });
+      console.log(line_items, "LINEITEMSSSS");
+  
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ["card"],
+        line_items,
+        mode: "payment",
+  
+        billing_address_collection: "required",
+        success_url: `${process.env.CLIENT_URL}/paymentSuccess`,
+        cancel_url: `${process.env.CLIENT_URL}/cart`,
+      });
+  
+      console.log(session.payment_status, "status", process.env.CLIENT_URL);
+  
+      if (session.payment_status === "unpaid") {
+        const orderPromises = req.body.cartItems.map(async (cartItem: any) => {
+          const studentId = cartItem?.student;
+          const tutorId = cartItem?.course[0]?.tutor;
+          const courseId = cartItem?.course[0]._id;
+          const amount = cartItem?.course[0]?.courseFee;
+  
+          const order = await orderModel.create({
+            studentId: studentId,
+            tutorId: tutorId,
+            courseId: courseId,
+            amount: amount,
+          });
+  
+          await order.save();
+  
+         
+  
+          await Course.findByIdAndUpdate(courseId, {
+            $push: { students: studentId },
+          });
+  
+          console.log("Order saved:", order);
+          return order;
+        });
+  
+        const orders = await Promise.all(orderPromises);
+  
+        res.json({
+          status:true,
+          url: session.url,
+          orderIds: orders.map((order) => order._id),
+          cart:req.body.cartItems
+        });
+      } else {
+        res.status(400).json({ error: "Payment not completed yet." });
+      }
+    } catch (err) {
+      console.error("Stripe Payment Error:", err);
+      res.status(500).json({ error: "Payment error" });
+    }
+  };
+
+
+
+  const deleteCart = async(req:Request,res:Response)=>{
+    try {
+        const studentId = req.body.id;
+        console.log(studentId,"iddddddddddddddddddddddddd");
+        
+        const clearCart = await CartModel.deleteMany({student:studentId})
+        if(clearCart.deletedCount > 0){
+            return res.json({status:true});
+        }
+        else {
+            return res.json({status:false})
+        }
+    
+    } catch (error) {
+        console.error("Error clearing cart:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+   
+    
+  }
+
+
+
+  const enrolledCourses =  async(req:Request,res:Response)=>{
+    try {
+        const studentId = req.params.studentId;
+        console.log(studentId,"............");
+        
+        const enrolledCourses = await orderModel.find({
+            studentId:studentId})
+            .populate("studentId")
+            .populate("courseId")
+            .populate("tutorId")
+           
+
+            console.log(enrolledCourses,"................");
+            
+
+            return res.status(200).json(enrolledCourses)
+        
+    } catch (error) {
+        console.error("Error clearing cart:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+  }
+  
+
+  const fetchCategory = async(req:Request,res:Response)=>{
+    try {
+        const categoryId = req.params.categoryId;
+        const category = await Category.find({_id:categoryId})
+        console.log(category,",,,,,,,,,,,,,,,,,,,,,,,,");
+        
+        if(category){
+            return res.status(200).json({category,message:"category fetched"})
+        }
+        else {
+            return res.status(400).json({message:"category not found"})
+        }
+        
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error: "Internal server error" });
+        
+    }
+  }
+
+
+  const getTutorList = async (req: Request, res: Response) => {
+    try {
+  
+      
+      const tutorDetails = await Tutor.find().exec();
+      if (tutorDetails) {
+        res.status(200).json({
+          tutorDetails,
+        });
+      } else {
+        return res.status(400).json({
+          message: "no users in this table",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+
+  const getTutorDetails = async (req:Request,res:Response)=>{
+    try {
+      console.log(req.params,"req.params");
+      
+      const {id}=req.params
+
+      const tutorDetails = await Tutor.findById(id);
+      console.log(tutorDetails,"tutorDetails");
+      
+      if (tutorDetails) {
+        res.status(200).json({
+          tutorDetails, 
+        });
+      } else {
+        return res.status(400).json({
+          message: "no users in this table",
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
 
     const studentLogout = async(req:Request,res:Response)=>{
@@ -485,5 +724,12 @@ export {
     addToWishlist,
     getWishlistItems,
     removeWishlistItem,
-    StudentEditProfile
+    StudentEditProfile,
+    stripePayment,
+    deleteCart,
+    refreshTokenCreation,
+    enrolledCourses,
+    fetchCategory,
+    getTutorList,
+    getTutorDetails
 }

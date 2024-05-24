@@ -1,5 +1,6 @@
 import { AxiosRequestConfig } from "axios";
-import { api, apiRequest } from "./axios.config";
+import { api, apiRequest,axiosInstance } from "./axios.config";
+
 
 
 //student---------------------------------------------------------------------------
@@ -58,8 +59,8 @@ export const resendOtp = async() => {
     const config = {
       method: "GET",
       url: `/student/cart/${studentId}`,
-    };
-    return await apiRequest(config);
+    }; 
+    return await axiosInstance(config);
   };
 
 
@@ -68,13 +69,38 @@ export const resendOtp = async() => {
       method: "GET",
       url: `/student/wishlist/${studentId}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
 
 
-
+export const fetchCategory = async(categoryId:string)=>{
+  const config = {
+    method: "GET",
+    url: `student/get-category/${categoryId}`,
+  }
+  return await axiosInstance(config);
+  
+}
   
 
+export const enrolledCourse = async(studentId:string)=>{
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `/student/enrolled-course/${studentId}`,
+  }
+  return await axiosInstance(config);
+}
+
+
+
+export const getAllCatagoryStudent=async()=>{
+  const config: AxiosRequestConfig = {
+    method: "GET",
+    url: `/student/get-category`,
+  };
+  return await axiosInstance(config);
+  
+}
 
   //tutor------------------------------------------------------------------------------------
 
@@ -130,9 +156,79 @@ export const resendOtp = async() => {
       method: "GET",
       url: `/tutor/getallcourse/${tutorId}`,
     }
-    return await apiRequest(config);
+    return await axiosInstance(config);
   }
   
+
+
+
+  export const getAllCatagoryTutor=async()=>{
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/tutor/get-category`,
+    };
+    return await axiosInstance(config);
+    
+  }
+
+
+  
+  export const fetchChatMessages = async(chatId: any)=>{
+    console.log(chatId,'CHHHH');
+    
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/chat/fetch-chat?id=${chatId}`,
+    }
+    return await axiosInstance(config);
+  }
+
+  export const fetchTutorChatMessages= async(chatId: any)=>{
+    
+    
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/chat/fetch-tutor-chat?id=${chatId}`,
+    }
+    return await axiosInstance(config);
+  }
+
+
+  export const getTutor = async(tutorId:any)=>{
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/student/get-tutor/${tutorId}`
+    }
+    return await axiosInstance(config)
+  }
+
+
+  export const enrolledStudents = async(tutorId:string)=>{
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/tutor/enrolled-students/${tutorId}`
+    }
+    return await axiosInstance(config)
+  }
+
+  export const getUserProfile = async (studentId: any) => {
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/tutor/user-profile/${studentId}`,
+    };
+    return await axiosInstance(config);
+  };
+
+
+  export const studentTutorListing = async () => {
+    const config: AxiosRequestConfig = {
+      method: "GET",
+      url: `/student/tutor-list`,
+    };
+    return await axiosInstance(config);
+  };
+ 
+
 
   //Admin----------------------------------------------------------------------------------
 
@@ -141,7 +237,7 @@ export const resendOtp = async() => {
       method: "GET",
       url: `/admin/adminstudent`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
 
 
@@ -151,16 +247,24 @@ export const resendOtp = async() => {
       method: "GET",
       url: `/admin/admintutor`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
 
+
+  export const axiosTest=async()=>{
+    
+    const response=await axiosInstance.get('http://localhost:5000/student/test')
+    console.log(response,'TTTEST RESPONCE');
+    
+
+  }
 
   export const adminListCategory = async () => {
     const config: AxiosRequestConfig = {
       method: "GET",
       url: `/admin/admincategory`
     }
-    return await apiRequest(config)
+    return await axiosInstance(config)
   };
   
 
@@ -170,7 +274,7 @@ export const resendOtp = async() => {
         method: "GET",
         url: `/admin/getcategoryid/${id}`
       };
-      return await apiRequest(config);
+      return await axiosInstance(config);
     } catch (error) {
       throw error;  
     }
@@ -183,7 +287,7 @@ export const getAllCatagory=async()=>{
     method: "GET",
     url: `/admin/admincategory`,
   };
-  return await apiRequest(config);
+  return await axiosInstance(config);
   
 }
 

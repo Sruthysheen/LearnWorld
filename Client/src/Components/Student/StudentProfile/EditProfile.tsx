@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { register } from "../../../Slices/studentSlice/studentSlice";
+import { studentEditProfile } from "../../../Utils/config/axios.PostMethods";
 
 interface FormInterface {
     studentname: string;
@@ -91,12 +92,7 @@ const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
        
         console.log(localStorage.getItem('Token'),'000000000000000000000');
         const token=localStorage.getItem('Token')
-        const response = await axios.post('http://localhost:5000/student/editprofile', formData, { 
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
+        const response:any = await studentEditProfile(formData);
         toast.success('Profile updated successfully!');
        if(response.data.status){
         console.log('SUCCES');

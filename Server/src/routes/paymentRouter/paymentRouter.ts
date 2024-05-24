@@ -1,8 +1,8 @@
 import express from 'express';
+import { stripePayment } from '../../controller/paymentController/paymentController';
 const paymentRouter = express.Router();
 
-paymentRouter.get("/",(req,res)=>{
-    res.json({status:true})
-})
+paymentRouter.post('/stripepayment',stripePayment)
+
 
 export default paymentRouter

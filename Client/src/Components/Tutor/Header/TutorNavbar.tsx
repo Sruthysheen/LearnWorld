@@ -55,10 +55,10 @@ function TutorNavbar() {
         <Link to="/tutor/home" className="py-4 px-2 text-sky-800 font-semibold">
                Home
               </Link>
-              <Link to="" className="py-4 px-2 text-sky-800 font-semibold">
+              <Link to="/tutor/enrolled-students" className="py-4 px-2 text-sky-800 font-semibold">
                Students
               </Link>
-              <Link to="/tutor/getallcourse/:id" className="py-4 px-2 text-sky-800 font-semibold">
+              <Link to="/tutor/getallcourse" className="py-4 px-2 text-sky-800 font-semibold">
                 My Course
               </Link>
               <div className="relative">

@@ -1,20 +1,22 @@
 import express from "express";
 const adminRouter = express.Router();
-import {addAdminCategory, blockStudent, blockTutor, deleteCategory, editCategory, getCategoryById, listAllCategory, listAllStudents, listAllTutors, loginAdmin, unblockStudent, unblockTutor} from "../../controller/adminController/adminController";
-
+import {addAdminCategory, blockStudent, blockTutor, deleteCategory, editCategory, getCategoryById, listAllCategory, listAllStudents, listAllTutors, loginAdmin, logoutAdmin, refreshTokenCreation, unblockStudent, unblockTutor} from "../../controller/adminController/adminController";
+import { isAdmin } from "../../middleware/adminMiddleware";
 
 adminRouter.post('/adminlogin',loginAdmin);
-adminRouter.get('/adminstudent',listAllStudents)
-adminRouter.put('/blockstudent/:id', blockStudent)
-adminRouter.put('/unblockstudent/:id', unblockStudent)
-adminRouter.get('/admintutor',listAllTutors)
-adminRouter.put('/blocktutor/:id',blockTutor)
-adminRouter.put('/unblocktutor/:id',unblockTutor)
-adminRouter.post('/adminaddcategory',addAdminCategory)
-adminRouter.get('/admincategory',listAllCategory)
-adminRouter.get('/getcategoryid/:id', getCategoryById)
-adminRouter.post('/editcategory',editCategory)
-adminRouter.delete('/deletecategory/:id',deleteCategory)
+adminRouter.get('/adminstudent',isAdmin,listAllStudents)
+adminRouter.put('/blockstudent/:id',isAdmin, blockStudent)
+adminRouter.put('/unblockstudent/:id',isAdmin, unblockStudent)
+adminRouter.get('/admintutor',isAdmin,listAllTutors)
+adminRouter.put('/blocktutor/:id',isAdmin,blockTutor)
+adminRouter.put('/unblocktutor/:id',isAdmin,unblockTutor)
+adminRouter.post('/adminaddcategory',isAdmin,addAdminCategory)
+adminRouter.get('/admincategory',isAdmin,listAllCategory)
+adminRouter.get('/getcategoryid/:id',isAdmin, getCategoryById)
+adminRouter.post('/editcategory',isAdmin,editCategory)
+adminRouter.delete('/deletecategory/:id',isAdmin,deleteCategory)
+adminRouter.post('/adminlogout',logoutAdmin)
+adminRouter.post('/refresh',refreshTokenCreation)
 
 
 export {adminRouter};

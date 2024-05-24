@@ -1,5 +1,5 @@
-import { AxiosRequestConfig } from "axios";
-import { apiRequest } from "./axios.config";
+import axios, { AxiosRequestConfig } from "axios";
+import { apiRequest, axiosInstance } from "./axios.config";
 
 
 
@@ -8,7 +8,7 @@ export const adminBlockStudent = async (userId: string) => {
       method: "PUT",
       url: `/admin/blockstudent/${userId}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
   
 
@@ -18,7 +18,7 @@ export const adminBlockStudent = async (userId: string) => {
       method: "PUT",
       url: `/admin/unblockstudent/${userId}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
 
 
@@ -28,7 +28,7 @@ export const adminBlockStudent = async (userId: string) => {
       method: "PUT",
       url: `/admin/blocktutor/${tutorId}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
   
 
@@ -38,5 +38,5 @@ export const adminBlockStudent = async (userId: string) => {
       method: "PUT",
       url: `/admin/unBlocktutor/${tutorId}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };

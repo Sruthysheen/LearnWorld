@@ -21,10 +21,10 @@ declare global {
 }
 
 const protect = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    console.log(req.headers,'ppp[pp');
+  
     
     const token = req.headers.authorization?.split(" ")[1];
-    const JWT_SECRET = process.env.JWT_SECRET as string;
+    const JWT_SECRET = process.env.JWT_REFRESHSECRET as string;
     console.log(token,'-----',JWT_SECRET,".................");
     if (token) {
         try {
@@ -34,12 +34,13 @@ const protect = asyncHandler(async (req: Request, res: Response, next: NextFunct
             const tutorId: string = verifiedToken.student_id; 
 
             const tutor: Document | null = await Tutor.findById(tutorId).select("-password");
+console.log(tutor);
 
             if (tutor) {
                 req.tutor = tutor as unknown as TutorData;
                 next();
-            } else {
-                res.status(404);
+            }  else{
+                res.status(403);
                 throw new Error("Tutor not found");
             }
         } catch (error) {
@@ -48,9 +49,11 @@ const protect = asyncHandler(async (req: Request, res: Response, next: NextFunct
         }
     }
 
-    if (!token) {
-        res.status(401).send({ message: "Token not found" });
-    }
+    if(!token)
+        {
+            res.status(401).send("Token not found");
+        }
+
 });
 
 export { protect };

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, response } from "express";
 import bcrypt from "bcryptjs";
-import generateToken from "../../Utlitis/generateToken";
+import {generateAccessToken,generateRefreshToken} from "../../Utlitis/generateToken";
 import "dotenv/config";
 import Tutor from "../../models/tutorModel";
 import { sendMail } from "../../middleware/otpMail";
@@ -8,6 +8,9 @@ import { uploadCloud} from "../../Utlitis/Cloudinary";
 import { protect } from "../../middleware/tutorMiddleware";
 import Course from "../../models/courseModel";
 import Category from "../../models/categoryModel";
+import jwt from "jsonwebtoken";
+import Student from "../../models/studentModel";
+import orderModel from "../../models/orderModel";
 
 const appState = {
   otp: null as null | number,
@@ -61,7 +64,7 @@ const verifyOtp = async (req: Request, res: Response) => {
     if (otp == req.session.otp) {
       const data = req.session.tutor;
       const addTutor = await Tutor.create(data);
-      const token = generateToken(addTutor._id);
+      const token = generateAccessToken(addTutor._id);
       const datas={
         _id: addTutor?._id,
         tutorname: addTutor?.tutorname,
@@ -99,9 +102,10 @@ const tutorLogin = async (req: Request, res: Response) => {
     if (tutor) {
       const passwordMatch = await tutor.matchPassword(password);
       if (passwordMatch) {
-        const token = generateToken(tutor._id);
-        
-        return res.json({response:tutor,token:token});
+        const accessToken = generateAccessToken(tutor._id);
+            const refreshToken =generateRefreshToken(tutor._id)
+            req.session.accessToken = accessToken;
+            return res.json({response:tutor,token:refreshToken});
       }
     } else {
       return res.status(401).json({ message: "Invalid email or password" });
@@ -130,6 +134,8 @@ const tutorOtpExpiry = async (req: Request, res: Response) => {
     .json({ message: "OTP expired please click the resend button" });
 };
 
+
+
 const tutorGoogleAuthentication = async (req: Request, res: Response) => {
   const inComingEmailForVerification = req.query.email;
   const name=req.query.name
@@ -150,7 +156,7 @@ const tutorGoogleAuthentication = async (req: Request, res: Response) => {
     });
     const response = await user.save();
     if (response) {
-      const token = generateToken(response._id);
+      const token = generateAccessToken(response._id);
       console.log("hiiiii");
 
       
@@ -161,6 +167,38 @@ const tutorGoogleAuthentication = async (req: Request, res: Response) => {
     }
   }
 };
+
+
+
+
+const refreshTokenCreation = async(req:Request,res:Response)=>{
+  try {
+      const token = req.session.accessToken
+       console.log(token,"ACESSSSSS");
+  
+  if(!token)return  res.status(403).json('token is not found')
+   let  payload:any
+  jwt.verify(token, process.env.JWT_SECRET as string, (err: any, decode: any) => {
+      if (err) {
+        return { status: false, message: "error in jwt sign" };
+      } else {
+          payload = decode;
+      }
+    });
+
+    if (!payload.student_id)return { status: false, message: "payload is not found" };
+
+    const refreshToken = generateRefreshToken(payload.student_id);
+    console.log(refreshToken,'REFRSH TOKEN ');
+    
+    res.status(200).json( { status: true, token:refreshToken });
+  } catch (error) {
+      
+  }
+}
+
+
+
 
 const tutorForgotPassword = async (req: Request, res: Response) => {
   try {
@@ -373,7 +411,22 @@ console.log(categoryObj,'***********');
 }
 
 
+const GetAllCategory = async (req: Request, res: Response) => {
+  try {
+    const categoryDetails = await Category.find({ isDeleted: false }).exec();
 
+    if (categoryDetails) {
+      return res.status(200).json({
+        categoryDetails
+      });
+    } else {
+      return res.status(400).json({ message: "Category does not exist" });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 
 
@@ -427,6 +480,7 @@ const categorys:any=await Category.findOne({categoryname:category})
 };
 
 
+
 const getAlltutorCourse = async (req:Request,res:Response)=>{
   try{
     const id=req.params.id
@@ -466,6 +520,8 @@ const addNewLesson = async(req:Request,res:Response)=>{
           { $push: { lessons: { courseId: courseId,category, description, title, video} } },
           { new: true }
         );
+        console.log(lessonAddedCourse,"...///...//...//..///");
+        
   if(lessonAddedCourse){
     return res.status(200).json(lessonAddedCourse);
   } else {
@@ -510,7 +566,7 @@ const editLesson = async (req: Request, res: Response) => {
     );
 
     if(updatedCourse){
-      return res.status(200).json(updatedCourse);
+      return res.status(200).json({data:updatedCourse});
     }
     else {
       return res.status(400).json({error:"Course not updated"})
@@ -521,6 +577,64 @@ const editLesson = async (req: Request, res: Response) => {
   }
 }
 
+
+const enrolledStudents =  async(req:Request,res:Response)=>{
+  try {
+    console.log("hiiiiiiiiiiiiiiiiii");
+    
+
+const tutorId = req.params.tutorId;
+
+console.log(req.body);
+
+    const studentData =await orderModel.find({tutorId}).populate('studentId').populate('courseId').exec()
+      
+
+    if(studentData){
+      
+const students:any=[]
+      for(let i=0 ;i<studentData.length;i++){
+        console.log(studentData[i],'------');
+        
+        const id=studentData[i].studentId
+        const studentDetails:any=await Student.findById(id)
+        
+        students.push(studentDetails)
+      }
+      
+        res.status(200).json({
+          studentData,
+          students
+        })
+    }else{
+        return res.status(400).json({
+            message:"no users Found"
+        })
+    }
+} catch (error) {
+    console.log(error)
+}
+}
+
+const studentProfile = async (req: Request, res: Response) => {
+  try {
+    const studentId = req.params.studentId;
+    console.log("Request received for studentId:", studentId);
+
+    const studentProfileDetails = await Student.findById(studentId).exec();
+    if (studentProfileDetails) {
+      res.status(200).json({
+        studentProfileDetails,
+      });
+    } else {
+      return res.status(400).json({
+        message: "no users in this table",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 
 const tutorLogout = async (req:Request, res:Response) => {
@@ -556,5 +670,9 @@ export {
   getAlltutorCourse,
   editCourse,
   addNewLesson,
-  editLesson
+  editLesson,
+  refreshTokenCreation,
+  GetAllCategory,
+  enrolledStudents,
+  studentProfile
 };

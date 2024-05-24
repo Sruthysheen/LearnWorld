@@ -70,7 +70,7 @@ function ViewSingleCourse() {
             </div>
             <div className="bg-white dark:bg-gray-800 flex justify-end mt-4 mr-4">
         <Link
-          to="/tutor/editcourse/:id"
+          to="/tutor/editcourse"
           className="block px-5 py-2 font-semibold text-center text-white transition-colors duration-200 transform bg-sky-600 rounded-md hover:bg-blue-400"
         >
           Edit Course

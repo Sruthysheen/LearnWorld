@@ -59,14 +59,17 @@ console.log(id,'THIS IS ID');
       
       if (response.status == 200) {
         // setCategoryDetails(response.data.categoryDetails)
-        toast.success("Category updated successfully!");
+        toast.success(response.data.message);
         navigate("/admin/admincategory");
         
-      } else {
-        toast.error("Failed to update category");
+      } 
+      else {
+        const errorMessage = response?.data?.message || 'An error occurred';
+        toast.error(errorMessage);
       }
-    } catch (error) {
-      toast.error("Failed to fetch category details");
+    } catch (error: any) {
+      const errorMessage = error.response?.data?.message || 'Failed to update category';
+      toast.error(errorMessage);
     }
   };
   

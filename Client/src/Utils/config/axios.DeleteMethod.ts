@@ -1,5 +1,5 @@
-import { AxiosRequestConfig } from "axios";
-import { apiRequest } from "./axios.config";
+import axios, { AxiosRequestConfig } from "axios";
+import { apiRequest, axiosInstance } from "./axios.config";
 
 
 export const deleteCategory = async (id: string) => {
@@ -7,7 +7,7 @@ export const deleteCategory = async (id: string) => {
       method: "DELETE",
       url: `/admin/deletecategory/${id}`,
     };
-    return await apiRequest(config);
+    return await axiosInstance(config);
   };
 
 
@@ -16,7 +16,7 @@ export const deleteCartItem = async(cartItemId:string) =>{
     method: "DELETE",
     url: `/student/removecartitem/${cartItemId}`
   }
-  return await apiRequest(config);
+  return await axiosInstance(config);
 }
 
 
@@ -25,6 +25,6 @@ export const deleteWishlistItem = async(wishlistItemId:string) =>{
     method: "DELETE",
     url: `/student/removeitem/${wishlistItemId}`
   }
-  return await apiRequest(config);
+  return await axiosInstance(config);
 }
 

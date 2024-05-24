@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import Admin from "../../models/adminModel";
-import generateToken from "../../Utlitis/generateToken";
+import {generateAccessToken,generateRefreshToken} from "../../Utlitis/generateToken";
 import Student from "../../models/studentModel";
 import Tutor from "../../models/tutorModel";
 import Category from "../../models/categoryModel";
+import jwt from "jsonwebtoken";
 
 
 
@@ -18,11 +19,13 @@ const loginAdmin = async (req: Request, res: Response) => {
   
       if (admin && admin.password === password) {
         const idString = admin._id.toString();
-        const token = generateToken(idString); 
+        const accessToken = generateAccessToken(idString); 
+        const refreshToken = generateRefreshToken(idString)
+        req.session.accessToken = accessToken;
         return res.status(200).json({
           id: idString,
           adminemail,
-          token,
+          token:refreshToken,
         });
       } else {
         return res.status(401).json({ message: "Invalid Email or password" });
@@ -31,6 +34,45 @@ const loginAdmin = async (req: Request, res: Response) => {
       return res.status(500).json({ message: "Internal Server Error" });
     }
   };
+
+
+
+
+
+
+
+  const refreshTokenCreation = async(req:Request,res:Response)=>{
+    try {
+        const token = req.session.accessToken
+         console.log(token,"ACESSSSSS");
+    
+    if(!token)return  res.status(403).json('token is not found')
+     let  payload:any
+    jwt.verify(token, process.env.JWT_SECRET as string, (err: any, decode: any) => {
+        if (err) {
+          return { status: false, message: "error in jwt sign" };
+        } else {
+            payload = decode;
+        }
+      });
+
+      if (!payload.student_id)return { status: false, message: "payload is not found" };
+
+      const refreshToken = generateRefreshToken(payload.student_id);
+      console.log(refreshToken,'REFRSH TOKEN ');
+      
+      res.status(200).json( { status: true, token:refreshToken });
+    } catch (error) {
+        
+    }
+}
+
+
+
+
+
+
+
 
   const logoutAdmin = async (req: Request, res: Response) => {
     res.cookie("jwtAdmin", "", {
@@ -190,8 +232,10 @@ const loginAdmin = async (req: Request, res: Response) => {
       const categoryExist = await Category.findOne({
         categoryname: { $regex: new RegExp(`^${categoryname}$`, 'i') }
       });
+      console.log(categoryExist);
+      
       if (categoryExist) {
-        return res.status(400).json({message: "Category already exists" });
+        return res.json({status:false,message:"Category already exists" });
     }
     
       const newCategory = await Category.create({
@@ -201,14 +245,15 @@ const loginAdmin = async (req: Request, res: Response) => {
 
       if(newCategory){
         return res.status(200).json({
+          status:true,
           categoryname,
           description,
           message:"Category added successfully"})
       } else {
-        return res.status(400).json({error:"Invalid category data"})
+        return res.json({status:false,message:"Invalid category data"})
       }
     } catch (error) {
-      res.status(500).json({ message: "Server error" });
+      res.json({status:false, message: "Server error" });
     }
   }
 
@@ -274,15 +319,30 @@ console.log(req.body);
       const { categoryname, description,id } = req.body;
   
       const category = await Category.findById(id);
-  
+      console.log(category,"----------------------");
+      
+
       if (!category) {
         return res.status(400).json({ error: "Invalid category" });
+      }
+
+      if (category.categoryname !== categoryname) {
+        const existingCategory = await Category.findOne({
+          categoryname: { $regex: new RegExp(`^${categoryname}$`, 'i') },
+          _id: { $ne: id }
+        });
+  
+        if (existingCategory) {
+          return res.status(400).json({message: "Category with the same name already exists" });
+        }
       }
   
       category.categoryname = categoryname;
       category.description = description;
-      
+    
       const updatedCategory = await category.save(); 
+      console.log(updatedCategory,".....................");
+      
   
       if (updatedCategory) {
         return res.status(200).json({ message: "Category updated successfully" });
@@ -360,6 +420,7 @@ console.log(req.body);
           getCategoryById,
           editCategory,
           deleteCategory,
+          refreshTokenCreation
           
           
         }

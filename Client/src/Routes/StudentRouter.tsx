@@ -16,6 +16,13 @@ import CartPage from '../Pages/Student/CartPage';
 import WishlistPage from '../Pages/Student/WishlistPage';
 import StudentProfilePage from '../Pages/Student/StudentProfilePage';
 import EditProfilePage from '../Pages/Student/EditProfilePage';
+import PaymentSuccessPage from '../Pages/Student/PaymentSuccessPage';
+import EnrolledCoursePage from '../Pages/Student/EnrolledCoursePage';
+import SingleEnrolledCourse from '../Components/Student/EnrolledCourse/SingleEnrolledCourse';
+import SingleEnrolledCoursePage from '../Pages/Student/SingleEnrolledCoursePage';
+import StudentChatPage from '../Pages/Student/StudentChatPage';
+import TutorPage from '../Pages/Student/TutorPage';
+
 
 const StudentRouter = () => {
   const location = useLocation();
@@ -33,20 +40,28 @@ const StudentRouter = () => {
         <Route path = "/forgotpassword" element = {<ForgotPasswordPage/>} />
         <Route path = "/forgototp" element = {<ForgotOtpPage/>} />
         <Route path = "/newpassword" element = {<NewPasswordPage/>} />
-
-
-        {/* <Route element={<PrivatePage isStudent={true} />}> */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/getcourses" element={<CourseViewPage/>} />
+        <Route path="/getcourses?s" element={<CourseViewPage/>} />
+
+
+        <Route element={<PrivatePage isStudent={true} />}>
+        
+        
         <Route path="/singlecourse" element={<StudentSingleCourseViewPage/>} />
-        <Route path="/cart/:studentId" element={<CartPage/>} />
-        <Route path="/wishlist/:studentId" element={<WishlistPage/>} />
+        <Route path="/cart" element={<CartPage/>} />
+        <Route path="/wishlist" element={<WishlistPage/>} />
         <Route path="/profile" element={<StudentProfilePage/>} />
         <Route path="/editprofile" element={<EditProfilePage/>} />
+        <Route path="/paymentsuccess" element={<PaymentSuccessPage/>} />
+        <Route path="/enrolled-course" element={<EnrolledCoursePage/>} />
+        <Route path="/tutor-list" element={<TutorPage/>} />
+        <Route path="/enrolled-singlecourse" element={<SingleEnrolledCoursePage/>} />
+        <Route path="/student-chat/:tutorId/:chatId" element={<StudentChatPage/>} />
+        
 
 
 
-        {/* </Route> */}
+        </Route>
 
       </Routes>
       {showFooter && <Footer/>}

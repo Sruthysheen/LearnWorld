@@ -17,6 +17,8 @@ import EditCoursePage from '../Pages/Tutor/EditCoursePage';
 import AddLessonPage from '../Pages/Tutor/AddLessonPage';
 import Footer from '../Components/Student/Home/Footer';
 import EditLessonPage from '../Pages/Tutor/EditLessonPage';
+import StudentsPage from '../Pages/Tutor/StudentsPage';
+import ChatPage from '../Pages/Student/ChatPage';
 
 const TutorRouter = () => {
     const location = useLocation();
@@ -37,11 +39,13 @@ const TutorRouter = () => {
                     <Route path="/home" element={<TutorHomePage/>} />
                     <Route path="/tutorprofile" element={<TutorProfilePage/>} />
                     <Route path="/addnewcourse" element={<TutorAddNewCoursePage/>} />
-                    <Route path="/getallcourse/:id" element={<MyCourseTutorPage/>} /> 
+                    <Route path="/getallcourse" element={<MyCourseTutorPage/>} /> 
                     <Route path="/viewcourse" element={<SingleCourseViewPage/>} />
-                    <Route path="/editcourse/:id" element={<EditCoursePage/>} />
+                    <Route path="/editcourse" element={<EditCoursePage/>} />
                     <Route path="/addlesson" element={<AddLessonPage/>} />
                     <Route path="/editlesson/:lessonId" element={<EditLessonPage/>} />
+                    <Route path="/enrolled-students" element={<StudentsPage/>} />
+                    <Route path="/chat-box/:chatId" element={<ChatPage  />} />
                 </Route>
             </Routes> 
             {showFooter && <Footer />}

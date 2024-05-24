@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useDispatch } from "react-redux";
 import { tutorregister } from "../../../Slices/tutorSlice/tutorSlice";
+import { editTutorProfile } from "../../../Utils/config/axios.PostMethods";
 
 interface FormInterface {
   tutorname: string;
@@ -97,12 +98,7 @@ function TutorBio() {
        
         console.log(localStorage.getItem('Token'),'000000000000000000000');
         const token=localStorage.getItem('Token')
-        const response = await axios.post('http://localhost:5000/tutor/edit-profile', formData, { 
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          }
-        });
+        const response = await editTutorProfile(formData)
         toast.success('Profile updated successfully!');
        if(response.data.status){
         console.log('SUCCES');

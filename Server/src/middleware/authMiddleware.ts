@@ -23,32 +23,37 @@ declare global{
 }
 
 
-const protect = asyncHandler(
+const isAuth = asyncHandler(
     
     async(req:Request, res:Response, next:NextFunction) =>{
         console.log(req.headers,'ppp[pp');
         const token = req.headers.authorization?.split(" ")[1];
-        const JWT_SECRET = process.env.JWT_SECRET as string;
+        console.log(token);
+        
+        const JWT_SECRET = process.env.JWT_REFRESHSECRET as string;
 
         if(token)
         {
             try {
                 const verifiedToken = jwt.verify(token,JWT_SECRET) as JwtPayload;
+                
                 console.log(verifiedToken,'-----');
 
                 const studentId: string = verifiedToken.student_id;
 
-                const student: Document | null = await Student.findById(studentId).select("-password");
+                const student = await Student.findById(studentId).select("-password");
                 
                 if(student){
                     req.student = student as unknown as StudentData;
                     next();
                 }
                 else{
-                    res.status(404);
+                    res.status(403);
                     throw new Error("Student not found");
                 }
             } catch (error) {
+                console.log(error,'0000000000000');
+                
                 res.status(401);
                 throw new Error("Not authorized, invalid token");
             }
@@ -56,14 +61,14 @@ const protect = asyncHandler(
 
         if(!token)
         {
-            res.status(401);
+            res.status(401).send("Token not found");
         }
 
     
     }
 );
 
-export {protect};
+export {isAuth};
 
 
 

@@ -1,6 +1,6 @@
-import { AxiosRequestConfig } from "axios";
+import { Axios, AxiosRequestConfig } from "axios";
 import {loginStudent, registerStudent, loginTutor, registerTutor, loginAdmin, AdminCategoryData} from "../api/types";
-import { apiRequest } from "./axios.config";
+import { apiRequest, axiosInstance } from "./axios.config";
 
 
 
@@ -105,7 +105,7 @@ export const addToCart = async(studentId:string,courseId:string)=>{
       url: `/student/addtocart`,
       data: data,
     }
-    return await apiRequest(config);
+    return await axiosInstance(config);
   }
 
 export const addToWishlist = async(studentId:string, courseId:string)=>{
@@ -118,21 +118,56 @@ export const addToWishlist = async(studentId:string, courseId:string)=>{
     url: `/student/addtowishlist`,
     data: data,
   }
-  return await apiRequest(config);
+  return await axiosInstance(config);
 }
   
+
+export const studentEditProfile = async(formData: FormData) => {
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/student/editprofile`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
+  }
+  return await axiosInstance(config);
+}
+
+
 
 export const stripePayment = async(cartItems:any)=>{
   const config: AxiosRequestConfig = {
     method:"POST",
-    url: `/payment/stripepayment`,
+    url: `/student/stripepayment`,
     data: {cartItems},
   }
   return await apiRequest(config);
 }
 
 
+export const deleteCart = async (data: any) => {
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url:`/student/clear-cart`,
+    data:data
+  
+  };
+  return await axiosInstance(config);
+};
  
+
+export const sendMessageFrom = async(tutorId: string, messages: string) =>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/chat/send-message`,
+    data: {
+      userId: tutorId,
+      message: messages,
+    }
+};
+  return await axiosInstance(config)
+};
 //admin------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 
@@ -172,7 +207,7 @@ export const adminLogout = async () => {
         data: categoryPayload,
       };
   
-      return await apiRequest(config);
+      return await axiosInstance(config);
     } catch (error) {
       throw error;
     }
@@ -194,11 +229,15 @@ export const adminLogout = async () => {
         data: data,
       };
   
-      return await apiRequest(config);
+      return await axiosInstance(config);
     } catch (error) {
       throw error;
     }
   };
+
+
+
+
 
 
   //tutor--------------------------------------------------------------------
@@ -299,27 +338,102 @@ export const tutorLogout = async () => {
 };
 
 
-export const editTutorProfile = async (tutorPayload: registerTutor,id:any) => {
-  console.log("tutorPayload", tutorPayload);
+// export const editTutorProfile1 = async (tutorPayload: registerTutor,id:any) => {
+//   console.log("tutorPayload", tutorPayload);
 
-  try {
-    const data={
-      id:id,
-      name:tutorPayload
-    }
-    const config: AxiosRequestConfig = {
-      method: "POST",
-      url: "/tutor/editProfile",
-      data: data,
-    };
+//   try {
+//     const data={
+//       id:id,
+//       name:tutorPayload
+//     }
+//     const config: AxiosRequestConfig = {
+//       method: "POST",
+//       url: "/tutor/editProfile",
+//       data: data,
+//     };
 
-    return await apiRequest(config);
-  } catch (error) {
-    throw error;
+//     return await apiRequest(config);
+//   } catch (error) {
+//     throw error;
+//   }
+// };
+
+export const editTutorProfile = async(formData:FormData)=>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/tutor/edit-Profile`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
   }
-};
-
-
+  return await axiosInstance(config);
+}
 
  
+export const addNewCourse = async(formData:FormData)=>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/tutor/addnewcourse`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
+  }
+  return await axiosInstance(config);
+}
 
+
+
+export const editCourse = async(formData:FormData,courseId:string)=>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/tutor/editcourse/${courseId}`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data : formData
+  }
+  return await axiosInstance(config);
+}
+
+
+
+export const addLesson = async(formData:FormData)=>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/tutor/addlesson`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
+  }
+  return await axiosInstance(config);
+}
+
+
+export const editLesson = async(formData:FormData,lessonId:string)=>{
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/tutor/editlesson/${lessonId}`,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    },
+    data: formData
+  }
+  return await axiosInstance(config);
+}
+
+
+
+export const createConversation=async(data:any)=>{
+  
+
+
+  const config: AxiosRequestConfig = {
+    method: "POST",
+    url: `/chat/createConversation`,
+    data: data
+  }
+  return await axiosInstance(config);
+}

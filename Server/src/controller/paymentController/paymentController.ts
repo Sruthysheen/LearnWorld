@@ -34,6 +34,7 @@ const stripePayment = async (req: Request, res: Response) => {
             },
             unit_amount: item?.course[0]?.courseFee * 100,
           },
+          quantity:1,
         };
       });
       console.log(line_items, "LINEITEMSSSS");

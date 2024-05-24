@@ -11,7 +11,7 @@ function Navbar() {
   const [isLogout, setIsLogout] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
 
   const { student } = useSelector((state: any) => state.student);
@@ -45,9 +45,23 @@ function Navbar() {
     }
   };
 
-  const handleSearch = () => {
-    console.log(`Searching for: ${searchTerm}`);
+  const submitSearch = () => {
+    navigate(`/getcourses?s=${searchQuery}`);
   };
+
+ useEffect(()=>{
+  const searchParams = new URLSearchParams(location.search);
+    const searchQueryParam = searchParams.get("s");
+
+    if (searchQueryParam) {
+      setSearchQuery(searchQueryParam);
+    }
+ })
+
+ const clearSearch = () => {
+  navigate(location.pathname, { replace: true });
+  setSearchQuery("");
+};
 
   return (
     <>
@@ -73,13 +87,22 @@ function Navbar() {
               <div className="hidden md:flex items-center space-x-1">
               <input
                 type="text"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search..."
                 className="border border-blue-300 rounded-md py-2 px-3 focus:outline-none focus:ring focus:border-sky-500 bg-white"
               />
+               {searchQuery && (
               <button
-                onClick={handleSearch}
+                onClick={clearSearch}
+                className="bg-sky-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-sky-700 transition duration-300"
+              >
+                &times;
+              </button>
+              
+)}
+ <button
+                onClick={submitSearch}
                 className="bg-sky-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-sky-700 transition duration-300"
               >
                 Search
@@ -95,14 +118,11 @@ function Navbar() {
               <Link to="/tutor/tutorregister" className="py-4 px-2 text-sky-800 font-semibold">
                 For Instructor
               </Link>
-              <a href="" className="py-4 px-2 text-sky-800 font-semibold">
-                Blog
-              </a>
              
               <div>
-              <li className="font-sans block mt-4 lg:inline-block lg:mt-0 lg:ml-6 align-middle text-sky-600 hover:text-gray-700">
-  <Link to="/cart/:studentId" role="button" className="relative flex">
-    <svg className="flex-1 w-8 h-8 fill-current" viewBox="0 0 24 24">
+              <li className="font-sans block mt-4 lg:inline-block lg:mt-0 lg:ml-6 align-middle text-sky-800 hover:text-gray-700">
+  <Link to="/cart" role="button" className="relative flex">
+    <svg className="flex-1 w-6 h-6 fill-current" viewBox="0 0 24 24">
       <path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75C7.17,14.7 7.18,14.66 7.2,14.63L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z" />
     </svg>
     {/* <span className="absolute right-0 top-0 rounded-full bg-sky-700 w-4 h-4 top right p-0 m-0 text-white font-mono text-sm  leading-tight text-center">
@@ -111,9 +131,9 @@ function Navbar() {
   </Link>
 </li>
 
-<li className="font-sans block mt-4 lg:inline-block lg:mt-0 lg:ml-6 align-middle text-sky-600 hover:text-gray-700">
-  <Link to="/wishlist/:studentId" role="button" className="relative flex">
-    <svg className="flex-1 w-8 h-8 fill-current" viewBox="0 0 24 24">
+<li className="font-sans block mt-4 lg:inline-block lg:mt-0 lg:ml-6 align-middle text-sky-800 hover:text-gray-700">
+  <Link to="/wishlist" role="button" className="relative flex">
+    <svg className="flex-1 w-6 h-6 fill-current" viewBox="0 0 24 24">
       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
     </svg>
     {/* <span className="absolute right-0 top-0 rounded-full bg-sky-700 w-4 h-4 top right p-0 m-0 text-white font-mono text-sm leading-tight text-center">
@@ -139,6 +159,8 @@ function Navbar() {
                   {showProfileDropdown && (
                     <div className="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-xl z-20">
                       <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">My Profile</Link>
+                      <Link to="/enrolled-course" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Enrolled Courses</Link>
+                      <Link to="/tutor-list" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tutors</Link>
                       <button onClick={handleLogout} className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</button>
                     </div>
                   )}

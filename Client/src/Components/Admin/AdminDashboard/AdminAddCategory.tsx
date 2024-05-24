@@ -15,15 +15,13 @@ const navigate = useNavigate();
 const handleAddCategory = async (data: CategoryInfo) => {
   try {
     const response:any = await addCategory({ ...data });
-  console.log(response.status);
+  console.log(response.status,'IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII');
   
-    if (response.status === 200) {
+    if (response.data.status) {
       toast.success(response.data.message);
       navigate('/admin/admincategory');
-    } else if (response.status === 400) {
-      toast.error(response.data.message);
-    } else {
-      toast.error('An unexpected error occurred');
+    } else  {
+      toast.error(response.data.message)
     }
   } catch (error) {
       toast.error('Network error, please try again later.');

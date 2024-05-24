@@ -64,6 +64,8 @@ function ListTutorCourse() {
   useEffect(() => {
   const fetchBio = async () => { 
     try {
+      console.log(tutor._id,'111111111111111111');
+      
       const response: any = await getAllCourses(tutor._id);
       console.log(response.data,"this is courses");
       

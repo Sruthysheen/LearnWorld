@@ -3,12 +3,13 @@ import axios from "axios";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
 import {
-  getAllCatagory,
+  getAllCatagoryTutor,
   getAllCourses,
 } from "../../../Utils/config/axios.GetMethods";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { setLessons, setSingleCourseDetails } from "../../../Slices/tutorSlice/courseSlice";
+import { addLesson } from "../../../Utils/config/axios.PostMethods";
 
 interface LessonFormInterface {
   courseId: string;
@@ -42,7 +43,7 @@ function AddLesson() {
 
   const fetchCategory = async () => {
     try {
-      const response: any = await getAllCatagory();
+      const response: any = await getAllCatagoryTutor();
       if (response?.data) {
         const data = response?.data?.categoryDetails.map(
           (category: any) => category.categoryname
@@ -120,25 +121,20 @@ function AddLesson() {
     try {
       console.log(localStorage.getItem("Token"), "000000000000000000000");
       const token = localStorage.getItem("Token");
-      const response = await axios.post(
-        "http://localhost:5000/tutor/addlesson",
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      toast.success("Lesson added successfully!");
-      if (response.data.status) {
+      const response = await addLesson(formData)
+      console.log(response,",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,");
+      
+     
+      if (response.status===200) {
+        toast.success("Lesson added successfully!");
         console.log("SUCCES");
-        const updatedCourse = response.data.data;
+        const updatedCourse = response?.data;
+        console.log(updatedCourse,'THIS IS COURSE-----',response);
+        
         const lessons = updatedCourse.lessons;
         dispatch(setSingleCourseDetails(updatedCourse)); 
         dispatch(setLessons(lessons));
-        navigate("/tutor/getallcourse/:id", {replace: true});
+        navigate("/tutor/getallcourse", {replace: true});
         toast.success("Lesson Added");
       }
     } catch (error) {
